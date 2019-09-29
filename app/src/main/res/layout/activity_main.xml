@@ -24,7 +24,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/avenir"
-                    android:text="@string/weekday"
+                    android:text="@string/tvWeekday"
                     android:textColor="@android:color/white"
                     android:textSize="36sp" />
 
@@ -42,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
                     android:fontFamily="@font/avenir"
-                    android:text="@string/temperature"
+                    android:text="@string/tvTemperature"
                     android:textAlignment="viewEnd"
                     android:textColor="@android:color/white"
                     android:textSize="36sp" />
@@ -55,14 +55,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="13dp"
-            android:layout_marginEnd="13dp">
+            android:layout_marginEnd="13dp"
+            android:layout_marginBottom="47dp">
 
                 <TextView
                     android:id="@+id/tvFullDate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/fullDate" />
+                    android:text="@string/tvFullDate" />
 
                 <TextView
                     android:id="@+id/tvCity"
@@ -70,7 +71,30 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="textEnd"
                     android:layout_weight="1"
-                    android:text="@string/city" />
+                    android:text="@string/tvCity" />
 
         </LinearLayout>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="403dp"
+            android:layout_marginStart="33dp"
+            android:layout_marginEnd="33dp"
+            android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnHeatMap"
+                    style="@style/SquareButton"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/btnHeatMap" />
+
+                <Button
+                    android:id="@+id/btnBikeRacks"
+                    style="@style/SquareButton"
+                    android:layout_alignParentRight="true"
+                    android:text="@string/btnBikeRacks" />
+
+        </RelativeLayout>
+
 </LinearLayout>

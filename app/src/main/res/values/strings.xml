@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">Argos</string>
-    <string name="weekday">Friday</string>
-    <string name="fullDate">November 4, 2019</string>
+    <string name="tvWeekday">Friday</string>
+    <string name="tvFullDate">November 4, 2019</string>
     <string name="descWeatherIcon">Weather icon</string>
-    <string name="temperature">15°</string>
-    <string name="city">Vancouver</string>
+    <string name="tvTemperature">15°</string>
+    <string name="tvCity">Vancouver</string>
+    <string name="btnHeatMap">Heat Map</string>
+    <string name="btnBikeRacks">Bike Racks</string>
 </resources>
