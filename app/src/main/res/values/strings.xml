@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Argos</string>
+    <string name="title_activity_bike_map">Map</string>
 </resources>
