@@ -13,9 +13,9 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="23dp"
             android:layout_marginStart="13dp"
             android:layout_marginEnd="13dp"
+            android:layout_marginTop="23dp"
             android:gravity="center_vertical">
 
 
@@ -80,8 +80,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="403dp"
-            android:layout_marginStart="33dp"
-            android:layout_marginEnd="33dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginEnd="13dp"
             android:orientation="horizontal">
 
                 <ImageButton
@@ -89,11 +89,13 @@
                     style="@style/SquareButton"
                     android:layout_width="180dp"
                     android:layout_height="171dp"
+                    android:layout_marginEnd="16dp"
                     android:layout_alignParentStart="true"
                     android:background="#00FFFFFF"
                     android:contentDescription="@string/btnHeatMap"
                     android:scaleType="fitCenter"
                     android:text="@string/btnBikeRacks"
+                    android:layout_gravity="center"
                     app:srcCompat="@mipmap/ic_theft_heat_map_foreground"
                     android:onClick="onMapClick"/>
 
@@ -102,11 +104,13 @@
                     style="@style/SquareButton"
                     android:layout_width="165dp"
                     android:layout_height="173dp"
+                    android:layout_marginStart="16dp"
                     android:layout_alignParentEnd="true"
                     android:background="#00FFFFFF"
                     android:contentDescription="@string/btnBikeRacks"
                     android:scaleType="centerCrop"
                     android:text="@string/btnBikeRacks"
+                    android:layout_gravity="center"
                     app:srcCompat="@mipmap/ic_bike_racks_foreground" />
         </RelativeLayout>
 
