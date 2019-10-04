@@ -63,12 +63,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginStart="2dp"
                     android:text="@string/tvFullDate" />
 
                 <TextView
                     android:id="@+id/tvCity"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="2dp"
                     android:textAlignment="textEnd"
                     android:layout_weight="1"
                     android:text="@string/tvCity" />
@@ -77,10 +79,8 @@
 
 
         <RelativeLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="403dp"
-            android:layout_marginStart="33dp"
-            android:layout_marginEnd="33dp"
             android:orientation="horizontal">
 
                 <ImageButton
@@ -93,11 +93,13 @@
                     android:contentDescription="@string/btnHeatMap"
                     android:scaleType="fitCenter"
                     android:text="@string/btnBikeRacks"
+                    android:layout_marginStart="33dp"
                     app:srcCompat="@mipmap/ic_theft_heat_map_foreground" />
 
                 <ImageButton
                     android:id="@+id/btnBikeRacks"
                     style="@style/SquareButton"
+                    android:layout_marginEnd="33dp"
                     android:layout_width="165dp"
                     android:layout_height="173dp"
                     android:layout_alignParentEnd="true"
