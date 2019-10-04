@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         tvFullDate.setText(getFullDate());
 
         TextView tvCity= findViewById(R.id.tvCity);
-        tvCity.setText(getCity());
+//        tvCity.setText(getCity());
 
     }
 
