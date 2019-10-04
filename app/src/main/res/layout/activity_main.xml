@@ -8,6 +8,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -93,7 +94,8 @@
                     android:contentDescription="@string/btnHeatMap"
                     android:scaleType="fitCenter"
                     android:text="@string/btnBikeRacks"
-                    app:srcCompat="@mipmap/ic_theft_heat_map_foreground" />
+                    app:srcCompat="@mipmap/ic_theft_heat_map_foreground"
+                    android:onClick="onMapClick"/>
 
                 <ImageButton
                     android:id="@+id/btnBikeRacks"

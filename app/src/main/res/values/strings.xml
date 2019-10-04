@@ -7,4 +7,5 @@
     <string name="tvCity">Vancouver</string>
     <string name="btnHeatMap">Heat Map</string>
     <string name="btnBikeRacks">Bike Racks</string>
+    <string name="title_activity_bike_map">Map</string>
 </resources>
