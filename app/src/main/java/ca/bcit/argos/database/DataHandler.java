@@ -21,17 +21,18 @@ public class DataHandler extends SQLiteOpenHelper {
     private static final String COLUMN_NAME6 = "YearInstalled";
 
     //initialize the database
-    public DataHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public DataHandler(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, DATABASE_NAME, factory, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_TABLE = ("CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID +
-                "INTEGER PRIMARYKEY, " + COLUMN_NAME0 + "INTEGER, " +
-                COLUMN_NAME1 + "TEXT, " + COLUMN_NAME2 + "TEXT, " + COLUMN_NAME3 +
-                "TEXT, " + COLUMN_NAME4 + "TEXT, " + COLUMN_NAME5 + "INTEGER, " +
-                COLUMN_NAME6 + "TEXT)");
+        String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID +
+                " INTEGER PRIMARY KEY," + COLUMN_NAME0 + " INTEGER," +
+                COLUMN_NAME1 + " TEXT," + COLUMN_NAME2 + " TEXT," + COLUMN_NAME3 +
+                " TEXT," + COLUMN_NAME4 + " TEXT," + COLUMN_NAME5 + " INTEGER," +
+                COLUMN_NAME6 + " TEXT)";
+        System.out.println(CREATE_TABLE);
         db.execSQL(CREATE_TABLE);
     }
 
