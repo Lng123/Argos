@@ -6,6 +6,17 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">#fff</item>
+        <item name="android:fontFamily">@font/avenir</item>
     </style>
 
+    <style name="SquareButton">
+        <item name="android:textColor">#000</item>
+        <item name="android:background">@android:drawable/dialog_holo_light_frame</item>
+        <item name="android:layout_width">142dp</item>
+        <item name="android:layout_height">142dp</item>
+        <item name="android:radius">20px</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
 </resources>
