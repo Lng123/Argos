@@ -54,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
         brList = new ArrayList<BikeRack>();
         dataHandler = new DataHandler(this, null);
         new GetBikeRacks().execute();
+        for (BikeRack b : brList) {
+            dataHandler.addHandler(b);
+        }
 
     }
 
@@ -187,13 +190,9 @@ public class MainActivity extends AppCompatActivity {
                         bikeRack.setBIA(bia);
                         bikeRack.setNumberOfRacks(nor);
                         bikeRack.setYearInstalled(yi);
-                        System.out.println("ID " + id);
-                        System.out.println("Snum " + snumber);
-                        System.out.println("Sname " + sname + " \n");
 
                         // adding contact to contact list
                         brList.add(bikeRack);
-                        dataHandler.addHandler(bikeRack);
                     }
                 } catch (final JSONException e) {
                     Log.e(TAG, "Json parsing error: " + e.getMessage());
