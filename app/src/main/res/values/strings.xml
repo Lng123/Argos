@@ -4,7 +4,7 @@
     <string name="tvFullDate">November 4, 2019</string>
     <string name="descWeatherIcon">Weather icon</string>
     <string name="tvTemperature">15°</string>
-    <string name="tvCity">Vancouver</string>
+    <string name="tvCity">Test</string>
     <string name="btnHeatMap">Heat Map</string>
     <string name="btnBikeRacks">Bike Racks</string>
     <string name="title_activity_bike_map">Map</string>
