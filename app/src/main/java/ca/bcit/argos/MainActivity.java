@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+//        String cityName = getCityName(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+
 
 //        new GetWeather().execute();
 
@@ -237,6 +239,10 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, cityName, Toast.LENGTH_SHORT).show();
     }
 
+    public void showCoordinates(View view) {
+        String coord = mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude();
+        Toast.makeText(this, coord, Toast.LENGTH_SHORT).show();
+    }
 
     private class GetWeather extends AsyncTask<Void, Void, Void> {
 
@@ -324,26 +330,6 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy", Locale.US);
         Date d = new Date();
         return sdf.format(d);
-    }
-
-    private String getCity(double lat, double lon){
-        String cityName = "Not Found";
-        geoPoint = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses;
-        try {
-            addresses = geoPoint.getFromLocation(lat, lon, 10);
-            if (addresses.size() > 0){
-                for(Address a: addresses){
-                    if(a.getLocality() != null && a.getLocality().length() > 0){
-                        cityName = a.getLocality();
-                        break;
-                    }
-                }
-            }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        return cityName;
     }
 
     public void onMapClick(View v) {
