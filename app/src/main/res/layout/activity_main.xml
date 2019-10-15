@@ -70,7 +70,7 @@
                     android:id="@+id/tvCity"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="2dp"
+                    android:layout_marginEnd="4dp"
                     android:textAlignment="textEnd"
                     android:layout_weight="1"
                     android:text="@string/tvCity" />
@@ -116,7 +116,7 @@
                     android:background="#00FFFFFF"
                     android:contentDescription="@string/btnBikeRacks"
                     android:text="@string/btnBikeRacks"
-                    android:onClick="getCityName"
+                    android:onClick="toastAddress"
                     app:srcCompat="@mipmap/ic_bike_racks_foreground" />
 
         </RelativeLayout>

@@ -22,8 +22,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,39 +80,23 @@ public class MainActivity extends AppCompatActivity {
         if (!checkPermissions()) {
             requestPermissions();
         } else {
-            getAddress();
+            getLastLocation();
         }
     }
 
-    public void getAddress() {
+    private void getLastLocation() {
         mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                .addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
-                    public void onSuccess(Location location) {
-                        if (location == null) {
-                            Log.w(TAG, "onSuccess:null");
-                            return;
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            mLastLocation = task.getResult();
+
+                            Toast.makeText(MainActivity.this, mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.w(TAG, "getLastLocation:exception", task.getException());
+                            Toast.makeText(MainActivity.this, "No location detected", Toast.LENGTH_SHORT).show();
                         }
-
-                        mLastLocation = location;
-
-                        // Determine whether a Geocoder is available.
-                        if (!Geocoder.isPresent()) {
-                            Toast.makeText(getApplicationContext(), "No geocoder available",
-                                    Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        // If the user pressed the fetch address button before we had the location,
-                        // this will be set to true indicating that we should kick off the intent
-                        // service after fetching the location.
-
-                    }
-                })
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "getLastLocation:onFailure", e);
                     }
                 });
     }
@@ -185,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted.
-                getAddress();
+                getLastLocation();
             } else {
                 // Permission denied.
 
@@ -224,14 +210,9 @@ public class MainActivity extends AppCompatActivity {
         longitude = mLastLocation.getLongitude();
         String cityName = "N/A";
         try {
-            addresses = geoPoint.getFromLocation(latitude, longitude, 10);
-            if (addresses.size() > 0){
-                for(Address a: addresses){
-                    if(a.getLocality() != null && a.getLocality().length() > 0){
-                        cityName = a.getLocality();
-                        break;
-                    }
-                }
+            addresses = geoPoint.getFromLocation(latitude, longitude, 1);
+            if(addresses.get(0).getLocality() != null && addresses.size() > 0){
+                cityName = addresses.get(0).getLocality();
             }
         } catch (IOException e){
             e.printStackTrace();
@@ -242,82 +223,6 @@ public class MainActivity extends AppCompatActivity {
     public void showCoordinates(View view) {
         String coord = mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude();
         Toast.makeText(this, coord, Toast.LENGTH_SHORT).show();
-    }
-
-    private class GetWeather extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Showing progress dialog
-            pDialog = new ProgressDialog(MainActivity.this);
-            pDialog.setMessage("Please wait...");
-            pDialog.setCancelable(false);
-            pDialog.show();
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            HttpHandler sh = new HttpHandler();
-            String jsonStr = null;
-
-            // Making a request to url and getting response
-            jsonStr = sh.makeServiceCall(SERVICE_URL);
-
-            Log.e(TAG, "Response from url: " + jsonStr);
-
-            if (jsonStr != null) {
-                try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
-
-                    // Getting JSON Array node
-                    JSONArray weatherJsonArray = jsonObj.getJSONArray("items");
-                    // looping through All Contacts
-                    for (int i = 0; i < weatherJsonArray.length(); i++) {
-                        JSONObject j = weatherJsonArray.getJSONObject(i);
-
-                    }
-                } catch (final JSONException e) {
-                    Log.e(TAG, "Json parsing error: " + e.getMessage());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),
-                                    "Json parsing error: " + e.getMessage(),
-                                    Toast.LENGTH_LONG)
-                                    .show();
-                        }
-                    });
-                }
-            } else {
-                Log.e(TAG, "Couldn't get json from server.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(),
-                                "Couldn't get json from server. Check LogCat for possible errors!",
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-                });
-
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-
-            // Dismiss the progress dialog
-            if (pDialog.isShowing())
-                pDialog.dismiss();
-
-//       Toast.makeText(MainActivity.this, book.getVolumeInfo().getIndustryIdentifiers().getIdentifier(), Toast.LENGTH_SHORT).show();
-        }
-
     }
 
     private String getWeekday() {
@@ -337,4 +242,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
+    public void toastAddress(View view) {
+        geoPoint = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses;
+        latitude = mLastLocation.getLatitude();
+        longitude = mLastLocation.getLongitude();
+        String cityName = "N/A";
+        try {
+            addresses = geoPoint.getFromLocation(latitude, longitude, 1);
+//            if(addresses.get(0).getLocality() != null && addresses.size() > 0){
+//                cityName = addresses.get(0).getLocality();
+//            }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        Toast.makeText(this, cityName, Toast.LENGTH_SHORT).show();
+    }
 }
