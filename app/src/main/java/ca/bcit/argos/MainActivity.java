@@ -43,13 +43,8 @@ public class MainActivity extends AppCompatActivity {
     Geocoder geoPoint;
     double latitude = 0;
     double longitude = 0;
-    private ProgressDialog pDialog;
-    private static String SERVICE_URL;
     private String TAG = MainActivity.class.getSimpleName();
-    private String weather_api_key = "ddc7532a7f1456ae4fe26a755543d0ae";
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
-    private static final String ADDRESS_REQUESTED_KEY = "address-request-pending";
-    private static final String LOCATION_ADDRESS_KEY = "location-address";
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
 
@@ -66,11 +61,6 @@ public class MainActivity extends AppCompatActivity {
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-//        String cityName = getCityName(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-
-
-//        new GetWeather().execute();
-
     }
 
     @Override
@@ -81,7 +71,9 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions();
         } else {
             getLastLocation();
+
         }
+
     }
 
     private void getLastLocation() {
@@ -92,7 +84,9 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful() && task.getResult() != null) {
                             mLastLocation = task.getResult();
 
-                            Toast.makeText(MainActivity.this, mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+                            TextView tvCity = findViewById(R.id.tvCity);
+                            tvCity.setText(getCityName(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+
                         } else {
                             Log.w(TAG, "getLastLocation:exception", task.getException());
                             Toast.makeText(MainActivity.this, "No location detected", Toast.LENGTH_SHORT).show();
@@ -203,21 +197,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void getCityName(View view) {
+    public String getCityName(double lat, double lng) {
         geoPoint = new Geocoder(this, Locale.getDefault());
         List<Address> addresses;
-        latitude = mLastLocation.getLatitude();
-        longitude = mLastLocation.getLongitude();
         String cityName = "N/A";
         try {
-            addresses = geoPoint.getFromLocation(latitude, longitude, 1);
+            addresses = geoPoint.getFromLocation(lat, lng, 1);
             if(addresses.get(0).getLocality() != null && addresses.size() > 0){
                 cityName = addresses.get(0).getLocality();
             }
         } catch (IOException e){
             e.printStackTrace();
         }
-        Toast.makeText(this, cityName, Toast.LENGTH_SHORT).show();
+        return cityName;
     }
 
     public void showCoordinates(View view) {
@@ -250,9 +242,9 @@ public class MainActivity extends AppCompatActivity {
         String cityName = "N/A";
         try {
             addresses = geoPoint.getFromLocation(latitude, longitude, 1);
-//            if(addresses.get(0).getLocality() != null && addresses.size() > 0){
-//                cityName = addresses.get(0).getLocality();
-//            }
+            if(addresses.get(0).getLocality() != null && addresses.size() > 0){
+                cityName = addresses.get(0).getLocality();
+            }
         } catch (IOException e){
             e.printStackTrace();
         }
