@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -122,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray weather = jsonObj.getJSONArray("weather");
                 JSONObject weatherObj = weather.getJSONObject(0);
                 String description = weatherObj.getString("main");
+                changeWeatherIcon((ImageView) findViewById(R.id.ivWeatherIcon),description);
 
                 JSONObject main = jsonObj.getJSONObject("main");
                 String temp = (int) main.getDouble("temp") + "°";
@@ -184,6 +186,36 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 view.setText(value);
+            }
+        });
+    }
+
+    private void changeWeatherIcon(final ImageView view, final String value){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                switch (value){
+                    case "Clouds":
+                        view.setImageResource(R.drawable.weather_clouds);
+                        break;
+                    case "Clear":
+                        view.setImageResource(R.drawable.weather_clear);
+                        break;
+                    case "Drizzle":
+                        view.setImageResource(R.drawable.weather_drizzle);
+                        break;
+                    case "Rain":
+                        view.setImageResource(R.drawable.weather_rain);
+                        break;
+                    case "Snow":
+                        view.setImageResource(R.drawable.weather_snow);
+                        break;
+                    case "Thunderstorm":
+                        view.setImageResource(R.drawable.weather_thunderstorm);
+                        break;
+                    default:
+                        view.setImageResource(R.drawable.weather_unknown);
+                }
             }
         });
     }

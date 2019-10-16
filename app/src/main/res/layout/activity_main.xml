@@ -34,7 +34,7 @@
                     android:layout_height="35dp"
                     android:contentDescription="@string/descWeatherIcon"
                     android:scaleType="fitEnd"
-                    app:srcCompat="@drawable/ic_cloudy" />
+                    app:srcCompat="@drawable/weather_unknown" />
 
                 <TextView
                     android:id="@+id/tvTemperature"
