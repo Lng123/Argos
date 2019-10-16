@@ -10,6 +10,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        // Please ensure you have a valid API KEY for OpenWeather to use this app
+        // A valid key will need to be entered
+        buildConfigField("String", "W_API_KEY", WEATHER_API_KEY)
     }
     buildTypes {
         release {

@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
+    private static final String API_KEY = BuildConfig.W_API_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
