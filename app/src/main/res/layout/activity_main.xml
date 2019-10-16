@@ -24,7 +24,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/avenir"
-                    android:text="@string/tvWeekday"
+                    android:text="@string/unknown"
                     android:textColor="@android:color/white"
                     android:textSize="30sp" />
 
@@ -42,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
                     android:fontFamily="@font/avenir"
-                    android:text="@string/tvTemperature"
+                    android:text="@string/unknown"
                     android:textAlignment="viewEnd"
                     android:textColor="@android:color/white"
                     android:textSize="30sp" />
@@ -64,7 +64,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="2dp"
-                    android:text="@string/tvFullDate" />
+                    android:text="@string/unknown" />
 
                 <TextView
                     android:id="@+id/tvCity"
@@ -73,7 +73,7 @@
                     android:layout_marginEnd="4dp"
                     android:textAlignment="textEnd"
                     android:layout_weight="1"
-                    android:text="@string/tvCity" />
+                    android:text="@string/unknown"/>
 
         </LinearLayout>
 

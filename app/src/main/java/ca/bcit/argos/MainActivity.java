@@ -1,6 +1,7 @@
 package ca.bcit.argos;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,8 +24,6 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
@@ -48,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
     private static final String API_KEY = BuildConfig.W_API_KEY;
+    private ProgressDialog pDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,89 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions();
         } else {
             getLastLocation();
+        }
+    }
 
+    /**
+     * Asynchronous method for getting the book data from a JSON.
+     */
+    @SuppressLint("StaticFieldLeak")
+    private class GetWeather extends AsyncTask<Void, Void, Void> {
+
+
+        /**
+         * Called before the asynchronous method begins.  Displays a "Please wait..." message so
+         * the user knows the data is being read.
+         */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //Showing progress dialog
+//            pDialog = new ProgressDialog(MainActivity.this);
+//            pDialog.setMessage("Please wait...");
+//            pDialog.setCancelable(false);
+//            pDialog.show();
+
+        }
+
+        /**
+         * Grabs JSON data from the given url, gets the JSON object and stores the needed data into
+         * BookVolume where it is appended to an ArrayList.
+         * @param arg0;
+         */
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            HttpHandler sh = new HttpHandler();
+            String jsonStr;
+
+//            String SERVICE_URL = "https://www.googleapis.com/books/v1/volumes?q=harry+potter";
+            // Making a request to url and getting response
+            String SERVICE_URL = "https://api.openweathermap.org/data/2.5/weather?lat="
+                                 + mLastLocation.getLatitude() + "&lon="
+                                 + mLastLocation.getLongitude() + "&units=metric"
+                                 + "&APPID=" + API_KEY;
+            jsonStr = sh.makeServiceCall(SERVICE_URL);
+            Log.e(TAG, "Response from url: " + jsonStr);
+
+            try {
+
+                JSONObject jsonObj = new JSONObject(jsonStr);
+                JSONArray weather = jsonObj.getJSONArray("weather");
+                JSONObject weatherObj = weather.getJSONObject(0);
+                String description = weatherObj.getString("main");
+
+                JSONObject main = jsonObj.getJSONObject("main");
+                String temp = (int) main.getDouble("temp") + "°";
+
+                setText((TextView) findViewById(R.id.tvTemperature), temp);
+
+            } catch (final JSONException e) {
+                Log.e(TAG, "Json parsing error: " + e.getMessage());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),
+                                "Json parsing error: " + e.getMessage(),
+                                Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
+            }
+            return null;
+        }
+
+        /**
+         * After all the data is saved, the BookAdapter is used to fill out the details of each list
+         * item.
+         * @param result;
+         */
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            // Dismiss the progress dialog
+//            if (pDialog.isShowing())
+//                pDialog.dismiss();
         }
 
     }
@@ -87,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
                             TextView tvCity = findViewById(R.id.tvCity);
                             tvCity.setText(getCityName(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+                            new GetWeather().execute();
 
                         } else {
                             Log.w(TAG, "getLastLocation:exception", task.getException());
@@ -94,6 +177,26 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void setText(final TextView view,final String value){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                view.setText(value);
+            }
+        });
+    }
+
+    public void toastAddress(View view) {
+
+        Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+    }
+
+    public void showCoordinates(View view) {
+        getLastLocation();
+        String coord = mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude();
+        Toast.makeText(this, coord, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -130,8 +233,9 @@ public class MainActivity extends AppCompatActivity {
         if (shouldProvideRationale) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
 
-            showSnackbar(R.string.permission_rationale, android.R.string.ok,
-                    new View.OnClickListener() {
+            showSnackbar(R.string.permission_rationale,
+                        android.R.string.ok,
+                        new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             // Request permission
@@ -140,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
                                     REQUEST_PERMISSIONS_REQUEST_CODE);
                         }
                     });
-
         } else {
             Log.i(TAG, "Requesting permission");
             // Request permission. It's possible this can be auto answered if device policy
@@ -213,11 +316,6 @@ public class MainActivity extends AppCompatActivity {
         return cityName;
     }
 
-    public void showCoordinates(View view) {
-        String coord = mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude();
-        Toast.makeText(this, coord, Toast.LENGTH_SHORT).show();
-    }
-
     private String getWeekday() {
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.US);
         Date d = new Date();
@@ -233,22 +331,5 @@ public class MainActivity extends AppCompatActivity {
     public void onMapClick(View v) {
         Intent i = new Intent(this, BikeMap.class);
         startActivity(i);
-    }
-
-    public void toastAddress(View view) {
-        geoPoint = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses;
-        latitude = mLastLocation.getLatitude();
-        longitude = mLastLocation.getLongitude();
-        String cityName = "N/A";
-        try {
-            addresses = geoPoint.getFromLocation(latitude, longitude, 1);
-            if(addresses.get(0).getLocality() != null && addresses.size() > 0){
-                cityName = addresses.get(0).getLocality();
-            }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        Toast.makeText(this, cityName, Toast.LENGTH_SHORT).show();
     }
 }

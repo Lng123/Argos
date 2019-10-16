@@ -1,10 +1,7 @@
 <resources>
     <string name="app_name">Argos</string>
-    <string name="tvWeekday">Friday</string>
-    <string name="tvFullDate">November 4, 2019</string>
+    <string name="unknown">N/A</string>
     <string name="descWeatherIcon">Weather icon</string>
-    <string name="tvTemperature">15°</string>
-    <string name="tvCity">N/A</string>
     <string name="btnHeatMap">Heat Map</string>
     <string name="btnBikeRacks">Bike Racks</string>
     <string name="title_activity_bike_map">Map</string>
