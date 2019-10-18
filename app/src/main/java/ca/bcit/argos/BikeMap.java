@@ -3,6 +3,8 @@ package ca.bcit.argos;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.nfc.Tag;
 import android.support.annotation.NonNull;
@@ -20,6 +22,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -87,10 +91,21 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     }
 
     private void addBikeRackPoints(){
+        int height = 100;
+        int width = 100;
+//        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bike_racks_marker);
+//        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+//        BitmapDescriptor smallMarkerIcon = BitmapDescriptorFactory.fromBitmap(b);
         for (LatLng rack : bikeRacks){
-            mMap.addMarker(new MarkerOptions().position(rack));
+
+            mMap.addMarker(new MarkerOptions()
+                    .position(rack)
+//                    .icon(smallMarkerIcon)
+            );
+
         }
     }
+
 
     private void getLocationPermission() {
         String[] permissions ={Manifest.permission.ACCESS_FINE_LOCATION};
