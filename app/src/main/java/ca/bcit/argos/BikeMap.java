@@ -1,18 +1,22 @@
 package ca.bcit.argos;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.nfc.Tag;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -29,9 +33,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import ca.bcit.argos.database.BikeRack;
+import ca.bcit.argos.database.DataHandler;
+import ca.bcit.argos.database.HttpHandler;
 
 public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
@@ -51,6 +61,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_map);
         getLocationPermission();
+        populateBikeRackList();
     }
 
 
@@ -74,20 +85,27 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vancouver, zoomLevel));*/
         if(locationPermissionGranted) {
             getDeviceLocation();
-            populateBikeRackList();
-            addBikeRackPoints();
             mMap.setMyLocationEnabled(true);
         }
     }
 
     private void populateBikeRackList() {
-        //Dummy data
+//        Dummy data
         LatLng rack1 = new LatLng(49.284875, -123.113120);
         LatLng rack2 = new LatLng(49.282811, -123.115062);
         LatLng rack3 = new LatLng(49.282216, -123.115727);
         bikeRacks.add(rack1);
         bikeRacks.add(rack2);
         bikeRacks.add(rack3);
+
+//        brList = new ArrayList<BikeRack>();
+//        dataHandler = new DataHandler(this, null);
+//        new GetBikeRacks().execute();
+//        for (BikeRack b : brList) {
+//            dataHandler.addHandler(b);
+//            bikeRacks.add(b);
+//        }
+
     }
 
     private void addBikeRackPoints(){
@@ -97,7 +115,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 //        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
 //        BitmapDescriptor smallMarkerIcon = BitmapDescriptorFactory.fromBitmap(b);
         for (LatLng rack : bikeRacks){
-
+//            LatLng loc = new LatLng(rack.getLatitude(), rack.getLongitude());
             mMap.addMarker(new MarkerOptions()
                     .position(rack)
 //                    .icon(smallMarkerIcon)

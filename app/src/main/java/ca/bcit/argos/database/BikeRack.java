@@ -1,6 +1,8 @@
 package ca.bcit.argos.database;
 
-public class BikeRack {
+import java.io.Serializable;
+
+public class BikeRack implements Serializable {
     private int ID;
     private int streetNumber;
     private String streetName;

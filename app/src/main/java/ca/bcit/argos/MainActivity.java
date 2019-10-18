@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,7 +65,16 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
     private static final String API_KEY = BuildConfig.W_API_KEY;
+
+    private ListView lv;
+    private static String SERVICE_URL
+            = "https://opendata.vancouver.ca/api/records/1.0/search/?dataset=bike-racks&rows=2000&facet=bia&facet=year_installed";
+    private static String GEOCODE_URL
+            = "https://maps.googleapis.com/maps/api/geocode/json?address=";
+    private ArrayList<BikeRack> brList;
+    private DataHandler dataHandler;
     private ProgressDialog pDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -349,14 +359,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-        brList = new ArrayList<BikeRack>();
-        dataHandler = new DataHandler(this, null);
-        new GetBikeRacks().execute();
-        for (BikeRack b : brList) {
-            dataHandler.addHandler(b);
-        }
-
     public String getCityName(double lat, double lng) {
         geoPoint = new Geocoder(this, Locale.getDefault());
         List<Address> addresses;
@@ -388,18 +390,6 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent(this, BikeMap.class);
         startActivity(i);
     }
-
-
-    private String TAG = MainActivity.class.getSimpleName();
-    private ProgressDialog pDialog;
-
-    private ListView lv;
-    private static String SERVICE_URL
-            = "https://opendata.vancouver.ca/api/records/1.0/search/?dataset=bike-racks&rows=2000&facet=bia&facet=year_installed";
-    private static String GEOCODE_URL
-            = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-    private ArrayList<BikeRack> brList;
-    private DataHandler dataHandler;
 
     private class GetBikeRacks extends AsyncTask<Void, Void, Void> {
 
