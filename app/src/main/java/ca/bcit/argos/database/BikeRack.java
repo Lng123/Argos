@@ -9,11 +9,13 @@ public class BikeRack {
     private String BIA;
     private int numberOfRacks;
     private String yearInstalled;
+    private double longitude;
+    private double latitude;
 
     public BikeRack() {
 
     }
-    public BikeRack(int id, int snu, String sna, String ss, String ssn, String bia, int nor, String yi) {
+    public BikeRack(int id, int snu, String sna, String ss, String ssn, String bia, int nor, String yi, double lon, double lat) {
         this.ID = id;
         this.streetNumber = snu;
         this.streetName = sna;
@@ -22,6 +24,8 @@ public class BikeRack {
         this.BIA = bia;
         this.numberOfRacks = nor;
         this.yearInstalled = yi;
+        this.longitude = lon;
+        this.latitude = lat;
     }
 
     public void setStreetNumber(int streetNumber) {
@@ -86,5 +90,21 @@ public class BikeRack {
 
     public void setID(int ID) {
         this.ID = ID;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double lon) {
+        this.longitude = lon;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double lat) {
+        this.latitude = lat;
     }
 }
