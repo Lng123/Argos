@@ -25,6 +25,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
+
+import ca.bcit.argos.database.BikeRack;
+
 public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = "BikeMap";
@@ -35,12 +39,14 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     private boolean locationPermissionGranted = false;
     private static float ZOOM = 16.0f;
 
+    private MarkerOptions options = new MarkerOptions();
+//    private ArrayList<BikeRack> bikeRacks = new ArrayList<>();
+    private ArrayList<LatLng> bikeRacks = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_map);
         getLocationPermission();
-
     }
 
 
@@ -64,7 +70,25 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vancouver, zoomLevel));*/
         if(locationPermissionGranted) {
             getDeviceLocation();
+            populateBikeRackList();
+            addBikeRackPoints();
             mMap.setMyLocationEnabled(true);
+        }
+    }
+
+    private void populateBikeRackList() {
+        //Dummy data
+        LatLng rack1 = new LatLng(49.284875, -123.113120);
+        LatLng rack2 = new LatLng(49.282811, -123.115062);
+        LatLng rack3 = new LatLng(49.282216, -123.115727);
+        bikeRacks.add(rack1);
+        bikeRacks.add(rack2);
+        bikeRacks.add(rack3);
+    }
+
+    private void addBikeRackPoints(){
+        for (LatLng rack : bikeRacks){
+            mMap.addMarker(new MarkerOptions().position(rack));
         }
     }
 
