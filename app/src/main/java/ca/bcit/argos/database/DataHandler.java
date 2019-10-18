@@ -19,6 +19,8 @@ public class DataHandler extends SQLiteOpenHelper {
     private static final String COLUMN_NAME4 = "BIA";
     private static final String COLUMN_NAME5 = "NumberOfRacks";
     private static final String COLUMN_NAME6 = "YearInstalled";
+    private static final String COLUMN_NAME7 = "Longitude";
+    private static final String COLUMN_NAME8 = "Latitude";
 
     //initialize the database
     public DataHandler(Context context, SQLiteDatabase.CursorFactory factory) {
@@ -31,7 +33,7 @@ public class DataHandler extends SQLiteOpenHelper {
                 " INTEGER PRIMARY KEY," + COLUMN_NAME0 + " INTEGER," +
                 COLUMN_NAME1 + " TEXT," + COLUMN_NAME2 + " TEXT," + COLUMN_NAME3 +
                 " TEXT," + COLUMN_NAME4 + " TEXT," + COLUMN_NAME5 + " INTEGER," +
-                COLUMN_NAME6 + " TEXT)";
+                COLUMN_NAME6 + " TEXT," + COLUMN_NAME7 + " REAL," + COLUMN_NAME8 + "REAL)";
         System.out.println(CREATE_TABLE);
         db.execSQL(CREATE_TABLE);
     }
@@ -63,6 +65,8 @@ public class DataHandler extends SQLiteOpenHelper {
         values.put(COLUMN_NAME4, bikerack.getBIA());
         values.put(COLUMN_NAME5, bikerack.getNumberOfRacks());
         values.put(COLUMN_NAME6, bikerack.getYearInstalled());
+        values.put(COLUMN_NAME7, bikerack.getLongitude());
+        values.put(COLUMN_NAME8, bikerack.getLatitude());
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(TABLE_NAME, null, values);
         db.close();
@@ -83,6 +87,8 @@ public class DataHandler extends SQLiteOpenHelper {
             bikeRack.setBIA(cursor.getString(5));
             bikeRack.setNumberOfRacks(cursor.getInt(6));
             bikeRack.setYearInstalled(cursor.getString(7));
+            bikeRack.setLongitude(cursor.getDouble(8));
+            bikeRack.setLatitude(cursor.getDouble(9));
             cursor.close();
         } else {
             bikeRack = null;

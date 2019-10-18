@@ -98,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
     private ListView lv;
     private static String SERVICE_URL
             = "https://opendata.vancouver.ca/api/records/1.0/search/?dataset=bike-racks&rows=2000&facet=bia&facet=year_installed";
+    private static String GEOCODE_URL
+            = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     private ArrayList<BikeRack> brList;
     private DataHandler dataHandler;
 
@@ -118,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... arg0) {
             HttpHandler sh = new HttpHandler();
             String jsonStr = null;
+            String geojsonStr = null;
 
             // Making a request to url and getting response
             jsonStr = sh.makeServiceCall(SERVICE_URL);
@@ -178,6 +181,51 @@ public class MainActivity extends AppCompatActivity {
                             yi = "";
                         }
 
+                        String api = getResources().getString(R.string.google_geocode_key);
+                        String geostr = GEOCODE_URL + snumber + sname + ",+Canada,Vancouver,+CA&key="
+                                + api;
+                        geojsonStr = sh.makeServiceCall(geostr);
+                        Log.e(TAG, "Response from url: " + geojsonStr);
+                        double lon = 0;
+                        double lat = 0;
+
+
+                        if (geojsonStr != null) {
+                            try {
+                                JSONObject geojsonObj = new JSONObject(geojsonStr);
+
+                                JSONObject geobrJson = geojsonObj.getJSONArray("results")
+                                        .getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
+                                lon = geobrJson.getDouble("lng");
+                                lat = geobrJson.getDouble("lat");
+
+                            } catch (final JSONException e) {
+                                Log.e(TAG, "Json parsing error: " + e.getMessage());
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(),
+                                                "Json parsing error: " + e.getMessage(),
+                                                Toast.LENGTH_LONG)
+                                                .show();
+                                    }
+                                });
+                            }
+                        } else {
+                            Log.e(TAG, "Couldn't get json from server.");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(),
+                                            "Couldn't get json from server. Check LogCat for possible errors!",
+                                            Toast.LENGTH_LONG)
+                                            .show();
+                                }
+                            });
+
+                        }
+
+
                         // tmp hash map for single contact
                         BikeRack bikeRack = new BikeRack();
 
@@ -190,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
                         bikeRack.setBIA(bia);
                         bikeRack.setNumberOfRacks(nor);
                         bikeRack.setYearInstalled(yi);
+                        bikeRack.setLongitude(lon);
+                        bikeRack.setLatitude(lat);
 
                         // adding contact to contact list
                         brList.add(bikeRack);
@@ -219,6 +269,8 @@ public class MainActivity extends AppCompatActivity {
                 });
 
             }
+
+
 
             return null;
         }
