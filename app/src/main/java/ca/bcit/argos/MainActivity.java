@@ -365,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
         String cityName = "N/A";
         try {
             addresses = geoPoint.getFromLocation(lat, lng, 1);
-            if(addresses.get(0).getLocality() != null && addresses.size() > 0){
+            if(addresses.size() > 0){
                 cityName = addresses.get(0).getLocality();
             }
         } catch (IOException e){
@@ -388,6 +388,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onMapClick(View v) {
         Intent i = new Intent(this, BikeMap.class);
+        Bundle args = new Bundle();
+        i.putExtra("brList", brList);
         startActivity(i);
     }
 

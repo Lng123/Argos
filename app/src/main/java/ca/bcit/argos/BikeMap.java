@@ -37,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import ca.bcit.argos.database.BikeRack;
@@ -53,6 +54,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     private boolean locationPermissionGranted = false;
     private static float ZOOM = 16.0f;
 
+    private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
 //    private ArrayList<BikeRack> bikeRacks = new ArrayList<>();
     private ArrayList<LatLng> bikeRacks = new ArrayList<>();
@@ -60,8 +62,12 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_map);
+        Intent i = getIntent();
+//        bikeRacks = (ArrayList<BikeRack>) i.getSerializableExtra("brList");
+//        bikeRacks.add()
+//        Log.e(TAG, "HELLO " + bikeRacks.size() + "");
         getLocationPermission();
-        populateBikeRackList();
+//        populateBikeRackList();
     }
 
 
@@ -77,6 +83,8 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        new AddBikeRacks().execute();
 
         // Add a marker in Sydney and move the camera
         /*
@@ -98,14 +106,6 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         bikeRacks.add(rack2);
         bikeRacks.add(rack3);
 
-//        brList = new ArrayList<BikeRack>();
-//        dataHandler = new DataHandler(this, null);
-//        new GetBikeRacks().execute();
-//        for (BikeRack b : brList) {
-//            dataHandler.addHandler(b);
-//            bikeRacks.add(b);
-//        }
-
     }
 
     private void addBikeRackPoints(){
@@ -124,6 +124,55 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Async task class to get json by making HTTP call
+     */
+    private class AddBikeRacks extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+//            // Showing progress dialog
+//            pDialog = new ProgressDialog(BikeMap.this);
+//            pDialog.setMessage("Please wait...");
+//            pDialog.setCancelable(false);
+//            pDialog.show();
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+//            populateBikeRackList();
+//            addBikeRackPoints();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    LatLng bcit = new LatLng(49.284875, -123.113120);
+                    mMap.addMarker(new MarkerOptions().position(bcit).title("Marker at BCIT DT"));
+                }
+            });
+
+
+//            Log.e(TAG, bikeRacks.size() + "");
+//            for (BikeRack rack : bikeRacks){
+//            LatLng loc = new LatLng(rack.getLatitude(), rack.getLongitude());
+//                mMap.addMarker(new MarkerOptions()
+//                    .position(loc)
+//                );
+//            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            // Dismiss the progress dialog
+//            if (pDialog.isShowing())
+//                pDialog.dismiss();
+        }
+    }
 
     private void getLocationPermission() {
         String[] permissions ={Manifest.permission.ACCESS_FINE_LOCATION};
