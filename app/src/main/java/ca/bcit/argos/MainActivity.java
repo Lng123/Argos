@@ -89,6 +89,12 @@ public class MainActivity extends AppCompatActivity {
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        brList = new ArrayList<BikeRack>();
+        dataHandler = new DataHandler(this, null);
+        new GetBikeRacks().execute();
+        for (BikeRack b : brList) {
+            dataHandler.addHandler(b);
+        }
     }
 
     @Override
@@ -141,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
                                  + mLastLocation.getLongitude() + "&units=metric"
                                  + "&APPID=" + API_KEY;
             jsonStr = sh.makeServiceCall(SERVICE_URL);
-            Log.e(TAG, "Response from url: " + jsonStr);
 
             try {
 
@@ -415,8 +420,6 @@ public class MainActivity extends AppCompatActivity {
             // Making a request to url and getting response
             jsonStr = sh.makeServiceCall(SERVICE_URL);
 
-            Log.e(TAG, "Response from url: " + jsonStr);
-
             if (jsonStr != null) {
                 try {
                     JSONObject jsonObj = new JSONObject(jsonStr);
@@ -424,7 +427,8 @@ public class MainActivity extends AppCompatActivity {
                     // Getting JSON Array node
                     JSONArray brJsonArray = jsonObj.getJSONArray("records");
                     // looping through All Contacts
-                    for (int i = 0; i < brJsonArray.length(); i++) {
+                    for (int i = 0; i < 3; i++) {
+//                    for (int i = 0; i < brJsonArray.length(); i++) {
                         JSONObject c = brJsonArray.getJSONObject(i);
 
                         int id = i + 1;

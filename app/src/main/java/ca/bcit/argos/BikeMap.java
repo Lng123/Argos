@@ -56,14 +56,18 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
     private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
-//    private ArrayList<BikeRack> bikeRacks = new ArrayList<>();
-    private ArrayList<LatLng> bikeRacks = new ArrayList<>();
+    private ArrayList<BikeRack> bikeRacks = new ArrayList<>();
+//    private ArrayList<LatLng> bikeRacks = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_map);
         Intent i = getIntent();
-//        bikeRacks = (ArrayList<BikeRack>) i.getSerializableExtra("brList");
+        bikeRacks = (ArrayList<BikeRack>) i.getSerializableExtra("brList");
+        Log.e(TAG, "" + bikeRacks);
+//        if(bikeRacks == null){
+//            Toast.makeText(this, "No Dice!", Toast.LENGTH_SHORT).show();
+//        }
 //        bikeRacks.add()
 //        Log.e(TAG, "HELLO " + bikeRacks.size() + "");
         getLocationPermission();
@@ -99,29 +103,29 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
     private void populateBikeRackList() {
 //        Dummy data
-        LatLng rack1 = new LatLng(49.284875, -123.113120);
-        LatLng rack2 = new LatLng(49.282811, -123.115062);
-        LatLng rack3 = new LatLng(49.282216, -123.115727);
-        bikeRacks.add(rack1);
-        bikeRacks.add(rack2);
-        bikeRacks.add(rack3);
+//        LatLng rack1 = new LatLng(49.284875, -123.113120);
+//        LatLng rack2 = new LatLng(49.282811, -123.115062);
+//        LatLng rack3 = new LatLng(49.282216, -123.115727);
+//        bikeRacks.add(rack1);
+//        bikeRacks.add(rack2);
+//        bikeRacks.add(rack3);
 
     }
 
     private void addBikeRackPoints(){
-        int height = 100;
-        int width = 100;
+//        int height = 100;
+//        int width = 100;
 //        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bike_racks_marker);
 //        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
 //        BitmapDescriptor smallMarkerIcon = BitmapDescriptorFactory.fromBitmap(b);
-        for (LatLng rack : bikeRacks){
+//        for (LatLng rack : bikeRacks){
 //            LatLng loc = new LatLng(rack.getLatitude(), rack.getLongitude());
-            mMap.addMarker(new MarkerOptions()
-                    .position(rack)
+//            mMap.addMarker(new MarkerOptions()
+//                            .position(rack)
 //                    .icon(smallMarkerIcon)
-            );
-
-        }
+//            );
+//
+//        }
     }
 
     /**
@@ -148,8 +152,16 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    LatLng bcit = new LatLng(49.284875, -123.113120);
-                    mMap.addMarker(new MarkerOptions().position(bcit).title("Marker at BCIT DT"));
+
+                    if(bikeRacks != null) {
+                        for(BikeRack rack : bikeRacks){
+                            LatLng loc = new LatLng(rack.getLatitude(), rack.getLongitude());
+                            mMap.addMarker(new MarkerOptions().position(loc).title("Marker at BCIT DT"));
+                        }
+                    } else {
+                        LatLng bcit = new LatLng(49.284875, -123.113120);
+                        mMap.addMarker(new MarkerOptions().position(bcit).title("Marker at BCIT DT"));
+                    }
                 }
             });
 
@@ -178,7 +190,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         String[] permissions ={Manifest.permission.ACCESS_FINE_LOCATION};
 
         if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
-        FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationPermissionGranted = true;
             initMap();
         } else {
