@@ -27,7 +27,14 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
     private static final String API_KEY = BuildConfig.W_API_KEY;
+    DatabaseReference databaseBikeracks;
 
     private ListView lv;
     private static String SERVICE_URL
@@ -81,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
+
         TextView weekday = findViewById(R.id.tvWeekday);
         weekday.setText(getWeekday());
 
@@ -91,10 +101,22 @@ public class MainActivity extends AppCompatActivity {
 
         brList = new ArrayList<BikeRack>();
         dataHandler = new DataHandler(this, null);
-        new GetBikeRacks().execute();
-        for (BikeRack b : brList) {
+        //new GetBikeRacks().execute();
+        /*for (BikeRack b : brList) {
             dataHandler.addHandler(b);
-        }
+        }*/
+
+        databaseBikeracks.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot studentSnapshot : dataSnapshot.getChildren()) {
+                    BikeRack bikeRack = studentSnapshot.getValue(BikeRack.class);
+                    brList.add(bikeRack);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
     }
 
     @Override
@@ -411,6 +433,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+
         @Override
         protected Void doInBackground(Void... arg0) {
             HttpHandler sh = new HttpHandler();
@@ -427,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
                     // Getting JSON Array node
                     JSONArray brJsonArray = jsonObj.getJSONArray("records");
                     // looping through All Contacts
-                    for (int i = 0; i < 3; i++) {
+                    for (int i = 0; i < brJsonArray.length(); i++) {
 //                    for (int i = 0; i < brJsonArray.length(); i++) {
                         JSONObject c = brJsonArray.getJSONObject(i);
 
@@ -534,6 +557,25 @@ public class MainActivity extends AppCompatActivity {
                         bikeRack.setYearInstalled(yi);
                         bikeRack.setLongitude(lon);
                         bikeRack.setLatitude(lat);
+
+                        String fbid = databaseBikeracks.push().getKey();
+                        Task setValueTask = databaseBikeracks.child(fbid).setValue(bikeRack);
+
+                        setValueTask.addOnSuccessListener(new OnSuccessListener() {
+                            @Override
+                            public void onSuccess(Object o) {
+                                Toast.makeText(MainActivity.this,"BikeRack added.",Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                        setValueTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(MainActivity.this,
+                                        "something went wrong.\n" + e.toString(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
 
                         // adding contact to contact list
                         brList.add(bikeRack);
