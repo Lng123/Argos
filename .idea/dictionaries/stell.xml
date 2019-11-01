@@ -3,7 +3,9 @@
     <words>
       <w>appid</w>
       <w>avenir</w>
+      <w>coord</w>
       <w>openweathermap</w>
+      <w>snackbar</w>
     </words>
   </dictionary>
 </component>
