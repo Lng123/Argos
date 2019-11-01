@@ -106,7 +106,7 @@
                     android:contentDescription="@string/btnBikeRacks"
                     android:text="@string/btnBikeRacks"
                     android:onClick="showCoordinates"
-                    app:srcCompat="@mipmap/ic_menu_theft_log_foreground" />
+                    app:srcCompat="@mipmap/ic_menu_theftlog_foreground" />
 
                 <ImageButton
                     android:id="@+id/btn"
