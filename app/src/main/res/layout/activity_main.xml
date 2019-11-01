@@ -94,7 +94,7 @@
                     android:layout_toStartOf="@id/btnBikeRacks"
                     android:text="@string/btnBikeRacks"
                     android:onClick="onMapClick"
-                    app:srcCompat="@mipmap/ic_theft_heat_map_foreground" />
+                    app:srcCompat="@mipmap/ic_menu_map_foreground" />
 
                 <ImageButton
                     android:id="@+id/btnBikeRacks"
@@ -106,7 +106,7 @@
                     android:contentDescription="@string/btnBikeRacks"
                     android:text="@string/btnBikeRacks"
                     android:onClick="showCoordinates"
-                    app:srcCompat="@mipmap/ic_bike_racks_foreground" />
+                    app:srcCompat="@mipmap/ic_menu_theft_log_foreground" />
 
                 <ImageButton
                     android:id="@+id/btn"
@@ -118,7 +118,7 @@
                     android:contentDescription="@string/btnBikeRacks"
                     android:text="@string/btnBikeRacks"
                     android:onClick="toastAddress"
-                    app:srcCompat="@mipmap/ic_bike_racks_foreground" />
+                    app:srcCompat="@mipmap/ic_menu_settings_foreground" />
 
         </RelativeLayout>
 
