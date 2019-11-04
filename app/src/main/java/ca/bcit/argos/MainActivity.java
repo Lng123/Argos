@@ -58,8 +58,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ca.bcit.argos.database.BikeRack;
+import ca.bcit.argos.database.CrimeData;
 import ca.bcit.argos.database.DataHandler;
 import ca.bcit.argos.database.HttpHandler;
+
+// For scv, comment out when done.
+import com.opencsv.CSVReader;
+import java.io.IOException;
+import java.io.FileReader;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     private Location mLastLocation;
     private static final String API_KEY = BuildConfig.W_API_KEY;
     DatabaseReference databaseBikeracks;
+    DatabaseReference databaseCrime;
 
     private ListView lv;
     private static String SERVICE_URL
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private static String GEOCODE_URL
             = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     private ArrayList<BikeRack> brList;
+    private ArrayList<CrimeData> crimeList;
     private DataHandler dataHandler;
     private ProgressDialog pDialog;
 
@@ -90,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
+        databaseCrime = FirebaseDatabase.getInstance().getReference("crime");
 
         TextView weekday = findViewById(R.id.tvWeekday);
         weekday.setText(getWeekday());
@@ -101,6 +110,9 @@ public class MainActivity extends AppCompatActivity {
 
         brList = new ArrayList<BikeRack>();
         dataHandler = new DataHandler(this, null);
+        // Code for adding BikeRack data to firebase.
+        // Only use it to update the firebase database with new sets of JSON and not to call it
+        // for any other database related actions.
         //new GetBikeRacks().execute();
         /*for (BikeRack b : brList) {
             dataHandler.addHandler(b);
@@ -420,6 +432,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
+    // Class for updating the BikeRacks data to the firebase database.  Do not use this
+    // if the firebase database is already in place, this is not the code for calling data
+    // from firebase database.
     private class GetBikeRacks extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -604,6 +619,173 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+            }
+
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            // Dismiss the progress dialog
+            if (pDialog.isShowing())
+                pDialog.dismiss();
+
+        }
+    }
+
+
+    private class GetCrimes extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Showing progress dialog
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Please wait...");
+            pDialog.setCancelable(false);
+            //pDialog.show();
+
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            HttpHandler sh = new HttpHandler();
+            String[] scvrow = null;
+            String geojsonStr = null;
+
+            try {
+                CSVReader reader = new CSVReader(new FileReader("crimedata_csv_all_years.csv"));
+                scvrow = reader.readNext();
+                String type = scvrow[0];
+                String year = scvrow[1];
+                String hundred_block = scvrow[6];
+                String neighborhood = scvrow[7];
+                int id = 1;
+                while ((scvrow = reader.readNext()) != null) {
+                    type = scvrow[0];
+                    year = scvrow[1];
+                    if (type.equals("Theft of Bicycle") && Integer.parseInt(year) >= 2015) {
+                        boolean has = false;
+                        int crimeIndex = 0;
+                        hundred_block = scvrow[6];
+                        neighborhood = scvrow[7];
+                        for (CrimeData crime: crimeList) {
+                            if (crime.getHundredBlock().equals(hundred_block)) {
+                                has = true;
+                                crimeIndex = crimeList.indexOf(crime);
+                            }
+                        }
+                        if (has) {
+                            int count = crimeList.get(crimeIndex).getCount();
+                            crimeList.get(crimeIndex).setCount(count + 1);
+                        } else {
+                            CrimeData c = new CrimeData(id, 1, hundred_block, neighborhood, 0, 0);
+                            crimeList.add(c);
+                            id++;
+                        }
+                    }
+
+                }
+            } catch (final IOException ex) {
+                Log.e(TAG, "CSV parsing error: " + ex.getMessage());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),
+                                "CSV parsing error: " + ex.getMessage(),
+                                Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
+            }
+
+            for (CrimeData c: crimeList) {
+                try {
+                        String street = c.getHundredBlock();
+                        street = street.replace("XX", "50");
+                        String api = getResources().getString(R.string.google_geocode_key);
+                        String geostr = GEOCODE_URL + street + ",+Canada,Vancouver,+CA&key="
+                                + api;
+                        geojsonStr = sh.makeServiceCall(geostr);
+                        Log.e(TAG, "Response from url: " + geojsonStr);
+                        double lon = 0;
+                        double lat = 0;
+
+
+                        if (geojsonStr != null) {
+                            try {
+                                JSONObject geojsonObj = new JSONObject(geojsonStr);
+
+                                JSONObject geobrJson = geojsonObj.getJSONArray("results")
+                                        .getJSONObject(0).getJSONObject("geometry").getJSONObject("location");
+                                lon = geobrJson.getDouble("lng");
+                                lat = geobrJson.getDouble("lat");
+
+                            } catch (final JSONException e) {
+                                Log.e(TAG, "Json parsing error: " + e.getMessage());
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(),
+                                                "Json parsing error: " + e.getMessage(),
+                                                Toast.LENGTH_LONG)
+                                                .show();
+                                    }
+                                });
+                            }
+                        } else {
+                            Log.e(TAG, "Couldn't get json from server.");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(),
+                                            "Couldn't get json from server. Check LogCat for possible errors!",
+                                            Toast.LENGTH_LONG)
+                                            .show();
+                                }
+                            });
+
+                        }
+
+                        c.setLongitude(lon);
+                        c.setLatitude(lat);
+
+                        String cid = databaseCrime.push().getKey();
+                        Task setValueTask = databaseCrime.child(cid).setValue(c);
+
+                        setValueTask.addOnSuccessListener(new OnSuccessListener() {
+                            @Override
+                            public void onSuccess(Object o) {
+                                Toast.makeText(MainActivity.this,"BikeRack added.",Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                        setValueTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(MainActivity.this,
+                                        "something went wrong.\n" + e.toString(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                } catch (final Exception e) {
+                    Log.e(TAG, "Json parsing error: " + e.getMessage());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(),
+                                    "Json parsing error: " + e.getMessage(),
+                                    Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    });
+                }
             }
 
 
