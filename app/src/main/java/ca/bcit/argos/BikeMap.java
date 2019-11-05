@@ -7,9 +7,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.nfc.Tag;
 import android.os.AsyncTask;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -115,6 +118,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
         @Override
         protected Void doInBackground(Void... arg0) {
+            final BitmapDescriptor icon = bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_marker);
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -127,7 +131,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
                                 double lat = (double) brSnapshot.child("latitude").getValue();
                                 double lng = (double) brSnapshot.child("longitude").getValue();
                                 LatLng loc = new LatLng(lat, lng);
-                                mMap.addMarker(new MarkerOptions().position(loc));
+                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
                             }
                         }
                         @Override
@@ -147,6 +151,16 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
             if (pDialog.isShowing())
                 pDialog.dismiss();
         }
+    }
+
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     private void getLocationPermission() {
