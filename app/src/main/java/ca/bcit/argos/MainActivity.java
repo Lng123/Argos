@@ -20,7 +20,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,16 +42,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import ca.bcit.argos.database.BikeRack;
 import ca.bcit.argos.database.DataHandler;
@@ -313,8 +302,13 @@ public class MainActivity extends AppCompatActivity {
         return sdf.format(d);
     }
 
-    public void onMapClick(View v) {
-        Intent i = new Intent(this, BikeMap.class);
+    public void onBikeRackMapClick(View v) {
+        Intent i = new Intent(this, BikeRackMap.class);
+        startActivity(i);
+    }
+
+    public void onBikeTheftMapClick(View v) {
+        Intent i = new Intent(this, BikeTheftMap.class);
         startActivity(i);
     }
 

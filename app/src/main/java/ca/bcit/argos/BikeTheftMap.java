@@ -3,28 +3,23 @@ package ca.bcit.argos;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.nfc.Tag;
 import android.os.AsyncTask;
-import android.support.annotation.DrawableRes;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +28,9 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -40,32 +38,31 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.heatmaps.Gradient;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
+import com.google.maps.android.heatmaps.WeightedLatLng;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import ca.bcit.argos.database.BikeRack;
-import ca.bcit.argos.database.DataHandler;
-import ca.bcit.argos.database.HttpHandler;
 
-public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
+public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback {
 
-    private static final String TAG = "BikeMap";
+    private static final String TAG = "BikeRackMap";
     private GoogleMap mMap;
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final int LOCATION_PERMISSION_CODE = 123;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private boolean locationPermissionGranted = false;
     private static float ZOOM = 16.0f;
+    private HeatmapTileProvider mProvider;
+    private TileOverlay mOverlay;
 
     private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
     private ArrayList<BikeRack> brList = new ArrayList<>();
-    DatabaseReference databaseBikeracks;
+    //DatabaseReference databaseBikeracks;
 
 
     @Override
@@ -73,7 +70,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_map);
 
-        databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
+        //databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
 
         getLocationPermission();
     }
@@ -92,65 +89,110 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        new AddBikeRacks().execute();
+        //new AddBikeRacks().execute();
 
         if(locationPermissionGranted) {
             getDeviceLocation();
             mMap.setMyLocationEnabled(true);
         }
+        addHeatMap();
     }
 
     /**
      * Async task class to get json by making HTTP call
      */
-    private class AddBikeRacks extends AsyncTask<Void, Void, Void> {
+//    private class AddBikeRacks extends AsyncTask<Void, Void, Void> {
+//
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//            // Showing progress dialog
+//            pDialog = new ProgressDialog(BikeTheftMap.this);
+//            pDialog.setMessage("Please wait...");
+//            pDialog.setCancelable(false);
+//            pDialog.show();
+//
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void... arg0) {
+//            final BitmapDescriptor icon = bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_marker);
+//
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//
+//                    databaseBikeracks.addValueEventListener(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                            for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
+//                                double lat = (double) brSnapshot.child("latitude").getValue();
+//                                double lng = (double) brSnapshot.child("longitude").getValue();
+//                                LatLng loc = new LatLng(lat, lng);
+//                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
+//                            }
+//                        }
+//                        @Override
+//                        public void onCancelled(@NonNull DatabaseError databaseError) { }
+//                    });
+//                }
+//            });
+//
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void result) {
+//            super.onPostExecute(result);
+//
+//            // Dismiss the progress dialog
+//            if (pDialog.isShowing())
+//                pDialog.dismiss();
+//        }
+//    }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Showing progress dialog
-            pDialog = new ProgressDialog(BikeMap.this);
-            pDialog.setMessage("Please wait...");
-            pDialog.setCancelable(false);
-            pDialog.show();
+    private void addHeatMap() {
+        LatLng loc1 = new LatLng(49.282704, -123.123280);
+        LatLng loc2 = new LatLng(49.283904, -123.121639);
+        LatLng loc3 = new LatLng(49.282333, -123.122937);
+        LatLng loc4 = new LatLng(49.283816, -123.124053);
+        LatLng loc5 = new LatLng(49.285021, -123.126115);
 
-        }
+        WeightedLatLng weighted1 = new WeightedLatLng(loc1, 2);
+        WeightedLatLng weighted2 = new WeightedLatLng(loc2, 4);
+        WeightedLatLng weighted3 = new WeightedLatLng(loc3, 6);
+        WeightedLatLng weighted4 = new WeightedLatLng(loc4, 8);
+        WeightedLatLng weighted5 = new WeightedLatLng(loc5, 10);
+        List<WeightedLatLng> list = new ArrayList<>();
+        list.add(weighted1);
+        list.add(weighted2);
+        list.add(weighted3);
+        list.add(weighted4);
+        list.add(weighted5);
 
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            final BitmapDescriptor icon = bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_marker);
+        // Create the gradient.
+        int[] colors = {
+                Color.rgb(102, 225, 0),
+                Color.rgb(180, 225, 0),
+                Color.rgb(225, 221, 0),
+                Color.rgb(225, 146, 0),
+                Color.rgb(225, 45, 0),
+                Color.rgb(225, 0, 0)
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+        };
 
-                    databaseBikeracks.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
-                                double lat = (double) brSnapshot.child("latitude").getValue();
-                                double lng = (double) brSnapshot.child("longitude").getValue();
-                                LatLng loc = new LatLng(lat, lng);
-                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
-                            }
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) { }
-                    });
-                }
-            });
+        float[] startPoints = {
+                0.1f, 0.2f, 0.3f, 0.4f, 0.6f, 1.0f
+        };
 
-            return null;
-        }
+        Gradient gradient = new Gradient(colors, startPoints);
 
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
+         mProvider = new HeatmapTileProvider.Builder()
+                .weightedData(list).radius(50).opacity(0.5).gradient(gradient)
+                .build();
 
-            // Dismiss the progress dialog
-            if (pDialog.isShowing())
-                pDialog.dismiss();
-        }
+        mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+
     }
 
 
@@ -201,7 +243,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
                                     ZOOM);
                         } else {
                             Log.d(TAG,"Current location is null");
-                            Toast.makeText(BikeMap.this, "Unable to get " +
+                            Toast.makeText(BikeTheftMap.this, "Unable to get " +
                                     "current location,", Toast.LENGTH_SHORT).show();
                         }
                     }

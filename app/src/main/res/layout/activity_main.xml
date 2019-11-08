@@ -93,7 +93,7 @@
                     android:contentDescription="@string/btnHeatMap"
                     android:layout_toStartOf="@id/btnBikeRacks"
                     android:text="@string/btnBikeRacks"
-                    android:onClick="onMapClick"
+                    android:onClick="onBikeTheftMapClick"
                     app:srcCompat="@mipmap/ic_menu_map_foreground" />
 
                 <ImageButton
@@ -105,8 +105,9 @@
                     android:layout_centerHorizontal="true"
                     android:contentDescription="@string/btnBikeRacks"
                     android:text="@string/btnBikeRacks"
-                    android:onClick="showCoordinates"
-                    app:srcCompat="@mipmap/ic_menu_theftlog_foreground" />
+                    android:onClick="onBikeRackMapClick"
+                    app:srcCompat="@mipmap/ic_menu_theftlog_foreground"
+                    />
 
                 <ImageButton
                     android:id="@+id/btn"
