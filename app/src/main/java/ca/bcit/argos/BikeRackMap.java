@@ -17,6 +17,9 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.maps.android.clustering.ClusterItem;
+import com.google.maps.android.clustering.ClusterManager;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -48,6 +51,7 @@ public class BikeRackMap extends FragmentActivity implements OnMapReadyCallback 
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private boolean locationPermissionGranted = false;
     private static float ZOOM = 16.0f;
+    private ClusterManager<ClusterItem> mClusterManager;
 
     private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
@@ -61,7 +65,6 @@ public class BikeRackMap extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_bike_map);
 
         databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
-
         getLocationPermission();
     }
 
@@ -78,8 +81,11 @@ public class BikeRackMap extends FragmentActivity implements OnMapReadyCallback 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        mClusterManager = new ClusterManager<>(this, mMap);
         new AddBikeRacks().execute();
+
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
 
         if(locationPermissionGranted) {
             getDeviceLocation();
@@ -115,15 +121,15 @@ public class BikeRackMap extends FragmentActivity implements OnMapReadyCallback 
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
-                                double lat = (double) brSnapshot.child("latitude").getValue();
-                                double lng = (double) brSnapshot.child("longitude").getValue();
-                                LatLng loc = new LatLng(lat, lng);
-                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
+                                BikeRack br = brSnapshot.getValue(BikeRack.class);
+                                mClusterManager.addItem(br);
                             }
+                            mClusterManager.cluster();
                         }
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) { }
                     });
+
                 }
             });
 

@@ -1,8 +1,9 @@
 package ca.bcit.argos.database;
 
-import java.io.Serializable;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
-public class BikeRack implements Serializable {
+public class BikeRack implements ClusterItem {
     private int ID;
     private int streetNumber;
     private String streetName;
@@ -108,5 +109,20 @@ public class BikeRack implements Serializable {
 
     public void setLatitude(double lat) {
         this.latitude = lat;
+    }
+
+    @Override
+    public LatLng getPosition() {
+        return new LatLng(latitude, longitude);
+    }
+
+    @Override
+    public String getTitle() {
+        return null;
+    }
+
+    @Override
+    public String getSnippet() {
+        return null;
     }
 }
