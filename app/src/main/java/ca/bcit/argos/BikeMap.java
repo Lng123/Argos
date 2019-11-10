@@ -3,28 +3,25 @@ package ca.bcit.argos;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.nfc.Tag;
 import android.os.AsyncTask;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.Toast;
+
+import com.google.maps.android.clustering.ClusterItem;
+import com.google.maps.android.clustering.ClusterManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,16 +38,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 
 import ca.bcit.argos.database.BikeRack;
-import ca.bcit.argos.database.DataHandler;
-import ca.bcit.argos.database.HttpHandler;
 
 public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
@@ -61,6 +51,7 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private boolean locationPermissionGranted = false;
     private static float ZOOM = 16.0f;
+    private ClusterManager<ClusterItem> mClusterManager;
 
     private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
@@ -74,7 +65,6 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         setContentView(R.layout.activity_bike_map);
 
         databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
-
         getLocationPermission();
     }
 
@@ -91,7 +81,8 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        mClusterManager = new ClusterManager<>(this, mMap);
+        mMap.setOnMarkerClickListener(mClusterManager);
         new AddBikeRacks().execute();
 
         if(locationPermissionGranted) {
@@ -128,15 +119,21 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
-                                double lat = (double) brSnapshot.child("latitude").getValue();
-                                double lng = (double) brSnapshot.child("longitude").getValue();
-                                LatLng loc = new LatLng(lat, lng);
-                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
+                                BikeRack br = brSnapshot.getValue(BikeRack.class);
+//                                double lat = (double) brSnapshot.child("latitude").getValue();
+//                                double lng = (double) brSnapshot.child("longitude").getValue();
+//                                LatLng loc = new LatLng(lat, lng);
+//                                mMap.addMarker(new MarkerOptions()
+//                                        .position(new LatLng(br.getLatitude(), br.getLongitude()))
+//                                        .icon(icon));
+                                mClusterManager.addItem(br);
                             }
+                            mClusterManager.cluster();
                         }
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) { }
                     });
+
                 }
             });
 
