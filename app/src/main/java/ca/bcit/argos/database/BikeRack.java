@@ -115,4 +115,14 @@ public class BikeRack implements ClusterItem {
     public LatLng getPosition() {
         return new LatLng(latitude, longitude);
     }
+
+    @Override
+    public String getTitle() {
+        return null;
+    }
+
+    @Override
+    public String getSnippet() {
+        return null;
+    }
 }

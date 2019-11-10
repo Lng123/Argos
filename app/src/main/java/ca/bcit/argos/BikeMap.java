@@ -82,8 +82,10 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mClusterManager = new ClusterManager<>(this, mMap);
-        mMap.setOnMarkerClickListener(mClusterManager);
         new AddBikeRacks().execute();
+
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
 
         if(locationPermissionGranted) {
             getDeviceLocation();
@@ -120,12 +122,6 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
                                 BikeRack br = brSnapshot.getValue(BikeRack.class);
-//                                double lat = (double) brSnapshot.child("latitude").getValue();
-//                                double lng = (double) brSnapshot.child("longitude").getValue();
-//                                LatLng loc = new LatLng(lat, lng);
-//                                mMap.addMarker(new MarkerOptions()
-//                                        .position(new LatLng(br.getLatitude(), br.getLongitude()))
-//                                        .icon(icon));
                                 mClusterManager.addItem(br);
                             }
                             mClusterManager.cluster();
