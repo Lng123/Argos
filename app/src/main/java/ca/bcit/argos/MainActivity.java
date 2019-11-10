@@ -3,6 +3,7 @@ package ca.bcit.argos;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -40,7 +42,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,9 +70,9 @@ import ca.bcit.argos.database.DataHandler;
 import ca.bcit.argos.database.HttpHandler;
 
 // For scv, comment out when done.
-import com.opencsv.CSVReader;
-import java.io.IOException;
-import java.io.FileReader;
+// import com.opencsv.CSVReader;
+// import java.io.IOException;
+// import java.io.FileReader;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -109,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         brList = new ArrayList<BikeRack>();
+        crimeList = new ArrayList<CrimeData>();
         dataHandler = new DataHandler(this, null);
         // Code for adding BikeRack data to firebase.
         // Only use it to update the firebase database with new sets of JSON and not to call it
@@ -118,17 +126,40 @@ public class MainActivity extends AppCompatActivity {
             dataHandler.addHandler(b);
         }*/
 
+
+        // Code for adding Crime Data data to firebase.
+        // Only use it to update the firebase database with new sets of JSON and not to call it
+        // for any other database related actions.
+        /*
+        new GetCrimes().execute();
+        */
+
         databaseBikeracks.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot studentSnapshot : dataSnapshot.getChildren()) {
-                    BikeRack bikeRack = studentSnapshot.getValue(BikeRack.class);
+                for (DataSnapshot bikeRackSnapshot : dataSnapshot.getChildren()) {
+                    BikeRack bikeRack = bikeRackSnapshot.getValue(BikeRack.class);
                     brList.add(bikeRack);
                 }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
+
+        databaseCrime.addValueEventListener((new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot crimeSnapshot : dataSnapshot.getChildren()) {
+                    CrimeData crime = crimeSnapshot.getValue(CrimeData.class);
+                    crimeList.add(crime);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        }));
     }
 
     @Override
@@ -638,6 +669,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /*
     private class GetCrimes extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -659,14 +691,19 @@ public class MainActivity extends AppCompatActivity {
             String geojsonStr = null;
 
             try {
-                CSVReader reader = new CSVReader(new FileReader("crimedata_csv_all_years.csv"));
-                scvrow = reader.readNext();
+                InputStream csvfile = getResources().openRawResource(R.raw.crimedata_csv_all_years);
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(csvfile, Charset.forName("UTF-8")));
+                String line = "";
+                line = reader.readLine();
+                scvrow = line.split(",");
                 String type = scvrow[0];
                 String year = scvrow[1];
                 String hundred_block = scvrow[6];
                 String neighborhood = scvrow[7];
                 int id = 1;
-                while ((scvrow = reader.readNext()) != null) {
+                while ((line = reader.readLine()) != null) {
+                    scvrow = line.split(",");
                     type = scvrow[0];
                     year = scvrow[1];
                     if (type.equals("Theft of Bicycle") && Integer.parseInt(year) >= 2015) {
@@ -703,6 +740,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
+
 
             for (CrimeData c: crimeList) {
                 try {
@@ -761,7 +799,7 @@ public class MainActivity extends AppCompatActivity {
                         setValueTask.addOnSuccessListener(new OnSuccessListener() {
                             @Override
                             public void onSuccess(Object o) {
-                                Toast.makeText(MainActivity.this,"BikeRack added.",Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainActivity.this,"Crime data added.",Toast.LENGTH_LONG).show();
                             }
                         });
 
@@ -787,6 +825,14 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             }
+            for (CrimeData crime : crimeList) {
+                String test = "id: " + crime.getID() + ", count: " + crime.getCount() +
+                        ", hundredblock: " + crime.getHundredBlock() + ", ngh: " + crime.getNeighbourhood() +
+                        ", lonlan" + crime.getLongitude() + ", " + crime.getLatitude();
+                Log.e(TAG, test);
+
+            }
+
 
 
 
@@ -802,6 +848,6 @@ public class MainActivity extends AppCompatActivity {
                 pDialog.dismiss();
 
         }
-    }
+    }*/
 
 }
