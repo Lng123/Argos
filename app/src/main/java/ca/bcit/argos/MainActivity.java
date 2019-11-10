@@ -32,11 +32,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,8 +75,6 @@ import ca.bcit.argos.database.HttpHandler;
 public class MainActivity extends AppCompatActivity {
 
     Geocoder geoPoint;
-    double latitude = 0;
-    double longitude = 0;
     private String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -88,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference databaseBikeracks;
     DatabaseReference databaseCrime;
 
-    private ListView lv;
     private static String SERVICE_URL
             = "https://opendata.vancouver.ca/api/records/1.0/search/?dataset=bike-racks&rows=2000&facet=bia&facet=year_installed";
     private static String GEOCODE_URL
@@ -114,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
         tvFullDate.setText(getFullDate());
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
 
         brList = new ArrayList<BikeRack>();
         crimeList = new ArrayList<CrimeData>();
@@ -179,39 +174,17 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     private class GetWeather extends AsyncTask<Void, Void, Void> {
 
-
-        /**
-         * Called before the asynchronous method begins.  Displays a "Please wait..." message so
-         * the user knows the data is being read.
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //Showing progress dialog
-//            pDialog = new ProgressDialog(MainActivity.this);
-//            pDialog.setMessage("Please wait...");
-//            pDialog.setCancelable(false);
-//            pDialog.show();
-
-        }
-
-        /**
-         * Grabs JSON data from the given url, gets the JSON object and stores the needed data into
-         * BookVolume where it is appended to an ArrayList.
-         * @param arg0;
-         */
         @Override
         protected Void doInBackground(Void... arg0) {
             HttpHandler sh = new HttpHandler();
             String jsonStr;
 
-//            String SERVICE_URL = "https://www.googleapis.com/books/v1/volumes?q=harry+potter";
             // Making a request to url and getting response
-            String SERVICE_URL = "https://api.openweathermap.org/data/2.5/weather?lat="
+            String WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat="
                                  + mLastLocation.getLatitude() + "&lon="
                                  + mLastLocation.getLongitude() + "&units=metric"
                                  + "&APPID=" + API_KEY;
-            jsonStr = sh.makeServiceCall(SERVICE_URL);
+            jsonStr = sh.makeServiceCall(WEATHER_URL);
 
             try {
 
@@ -240,21 +213,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return null;
         }
-
-        /**
-         * After all the data is saved, the BookAdapter is used to fill out the details of each list
-         * item.
-         * @param result;
-         */
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-
-            // Dismiss the progress dialog
-//            if (pDialog.isShowing())
-//                pDialog.dismiss();
-        }
-
     }
 
     private void getLastLocation() {
@@ -317,7 +275,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void toastAddress(View view) {
-
         Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
     }
 
@@ -327,13 +284,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, coord, Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Shows a {@link Snackbar}.
-     *
-     * @param mainTextStringId The id for the string resource for the Snackbar text.
-     * @param actionStringId   The text of the action item.
-     * @param listener         The listener associated with the Snackbar action.
-     */
+
     private void showSnackbar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
         Snackbar.make(findViewById(android.R.id.content),
@@ -342,9 +293,6 @@ public class MainActivity extends AppCompatActivity {
                 .setAction(getString(actionStringId), listener).show();
     }
 
-    /**
-     * Return the current state of the permissions needed.
-     */
     private boolean checkPermissions() {
         int permissionState = ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -356,14 +304,8 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION);
 
-        // Provide an additional rationale to the user. This would happen if the user denied the
-        // request previously, but didn't check the "Don't ask again" checkbox.
         if (shouldProvideRationale) {
-            Log.i(TAG, "Displaying permission rationale to provide additional context.");
-
-            showSnackbar(R.string.permission_rationale,
-                        android.R.string.ok,
-                        new View.OnClickListener() {
+            showSnackbar(R.string.permission_rationale, android.R.string.ok, new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             // Request permission
@@ -371,45 +313,22 @@ public class MainActivity extends AppCompatActivity {
                                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                     REQUEST_PERMISSIONS_REQUEST_CODE);
                         }
-                    });
+            });
         } else {
-            Log.i(TAG, "Requesting permission");
-            // Request permission. It's possible this can be auto answered if device policy
-            // sets the permission in a given state or the user denied the permission
-            // previously and checked "Never ask again".
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
 
-    /**
-     * Callback received when a permissions request has been completed.
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        Log.i(TAG, "onRequestPermissionResult");
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             if (grantResults.length <= 0) {
-                // If user interaction was interrupted, the permission request is cancelled and you
-                // receive empty arrays.
-                Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted.
                 getLastLocation();
             } else {
-                // Permission denied.
-
-                // Notify the user via a SnackBar that they have rejected a core permission for the
-                // app, which makes the Activity useless. In a real app, core permissions would
-                // typically be best requested during a welcome-screen flow.
-
-                // Additionally, it is important to remember that a permission might have been
-                // rejected without asking the user for permission (device policy or "Never ask
-                // again" prompts). Therefore, a user interface affordance is typically implemented
-                // when permissions are denied. Otherwise, your app could appear unresponsive to
-                // touches or interactions which have required permissions.
                 showSnackbar(R.string.permission_denied_explanation, R.string.settings,
                         new View.OnClickListener() {
                             @Override
@@ -458,8 +377,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void onMapClick(View v) {
         Intent i = new Intent(this, BikeMap.class);
-        Bundle args = new Bundle();
-        i.putExtra("brList", brList);
         startActivity(i);
     }
 

@@ -7,9 +7,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.nfc.Tag;
 import android.os.AsyncTask;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -32,6 +35,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,22 +64,18 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
     private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
-    private ArrayList<BikeRack> bikeRacks = new ArrayList<>();
-//    private ArrayList<LatLng> bikeRacks = new ArrayList<>();
+    private ArrayList<BikeRack> brList = new ArrayList<>();
+    DatabaseReference databaseBikeracks;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_map);
-        Intent i = getIntent();
-        bikeRacks = (ArrayList<BikeRack>) i.getSerializableExtra("brList");
-        Log.e(TAG, "" + bikeRacks);
-//        if(bikeRacks == null){
-//            Toast.makeText(this, "No Dice!", Toast.LENGTH_SHORT).show();
-//        }
-//        bikeRacks.add()
-//        Log.e(TAG, "HELLO " + bikeRacks.size() + "");
+
+        databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
+
         getLocationPermission();
-//        populateBikeRackList();
     }
 
 
@@ -90,42 +94,10 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
 
         new AddBikeRacks().execute();
 
-        // Add a marker in Sydney and move the camera
-        /*
-        LatLng vancouver = new LatLng(49.246292, -123.116226);
-        mMap.addMarker(new MarkerOptions().position(vancouver).title("Vancouver"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vancouver, zoomLevel));*/
         if(locationPermissionGranted) {
             getDeviceLocation();
             mMap.setMyLocationEnabled(true);
         }
-    }
-
-    private void populateBikeRackList() {
-//        Dummy data
-//        LatLng rack1 = new LatLng(49.284875, -123.113120);
-//        LatLng rack2 = new LatLng(49.282811, -123.115062);
-//        LatLng rack3 = new LatLng(49.282216, -123.115727);
-//        bikeRacks.add(rack1);
-//        bikeRacks.add(rack2);
-//        bikeRacks.add(rack3);
-
-    }
-
-    private void addBikeRackPoints(){
-//        int height = 100;
-//        int width = 100;
-//        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bike_racks_marker);
-//        Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-//        BitmapDescriptor smallMarkerIcon = BitmapDescriptorFactory.fromBitmap(b);
-//        for (LatLng rack : bikeRacks){
-//            LatLng loc = new LatLng(rack.getLatitude(), rack.getLongitude());
-//            mMap.addMarker(new MarkerOptions()
-//                            .position(rack)
-//                    .icon(smallMarkerIcon)
-//            );
-//
-//        }
     }
 
     /**
@@ -136,43 +108,38 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-//            // Showing progress dialog
-//            pDialog = new ProgressDialog(BikeMap.this);
-//            pDialog.setMessage("Please wait...");
-//            pDialog.setCancelable(false);
-//            pDialog.show();
+            // Showing progress dialog
+            pDialog = new ProgressDialog(BikeMap.this);
+            pDialog.setMessage("Please wait...");
+            pDialog.setCancelable(false);
+            pDialog.show();
 
         }
 
         @Override
         protected Void doInBackground(Void... arg0) {
-//            populateBikeRackList();
-//            addBikeRackPoints();
+            final BitmapDescriptor icon = bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_marker);
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
 
-                    if(bikeRacks != null) {
-                        for(BikeRack rack : bikeRacks){
-                            LatLng loc = new LatLng(rack.getLatitude(), rack.getLongitude());
-                            mMap.addMarker(new MarkerOptions().position(loc).title("Marker at BCIT DT"));
+                    databaseBikeracks.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
+                                double lat = (double) brSnapshot.child("latitude").getValue();
+                                double lng = (double) brSnapshot.child("longitude").getValue();
+                                LatLng loc = new LatLng(lat, lng);
+                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
+                            }
                         }
-                    } else {
-                        LatLng bcit = new LatLng(49.284875, -123.113120);
-                        mMap.addMarker(new MarkerOptions().position(bcit).title("Marker at BCIT DT"));
-                    }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) { }
+                    });
                 }
             });
 
-
-//            Log.e(TAG, bikeRacks.size() + "");
-//            for (BikeRack rack : bikeRacks){
-//            LatLng loc = new LatLng(rack.getLatitude(), rack.getLongitude());
-//                mMap.addMarker(new MarkerOptions()
-//                    .position(loc)
-//                );
-//            }
             return null;
         }
 
@@ -181,9 +148,19 @@ public class BikeMap extends FragmentActivity implements OnMapReadyCallback {
             super.onPostExecute(result);
 
             // Dismiss the progress dialog
-//            if (pDialog.isShowing())
-//                pDialog.dismiss();
+            if (pDialog.isShowing())
+                pDialog.dismiss();
         }
+    }
+
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     private void getLocationPermission() {
