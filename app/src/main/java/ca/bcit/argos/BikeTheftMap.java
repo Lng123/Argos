@@ -16,6 +16,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -38,6 +41,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.clustering.ClusterItem;
+import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.heatmaps.Gradient;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
@@ -59,13 +64,15 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
     private static float ZOOM = 16.0f;
     private HeatmapTileProvider mProvider;
     private TileOverlay mOverlay;
+    private ClusterManager<ClusterItem> mClusterManager;
 
     private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
     private ArrayList<BikeRack> brList = new ArrayList<>();
     private List<WeightedLatLng> heatlist = new ArrayList<>();
-    //DatabaseReference databaseBikeracks;
     DatabaseReference databaseCrime;
+    DatabaseReference databaseBikeracks;
+    Switch theftsw;
 
 
     @Override
@@ -73,7 +80,8 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bike_map);
 
-        //databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
+
+        databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
         databaseCrime = FirebaseDatabase.getInstance().getReference("crime");
 
         getLocationPermission();
@@ -93,14 +101,29 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //new AddBikeRacks().execute();
         new AddBikeCrime().execute();
+        mClusterManager = new ClusterManager<>(this, mMap);
+
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
 
         if(locationPermissionGranted) {
             getDeviceLocation();
             mMap.setMyLocationEnabled(true);
         }
-//        addHeatMap();
+
+        theftsw = findViewById(R.id.switch1);
+        theftsw.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                if(theftsw.isChecked()) {
+                    addHeatMap();
+
+                } else {
+                    mOverlay.remove();
+                }
+            }
+        });
     }
 
     /**
@@ -126,28 +149,37 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    databaseBikeracks.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
+                                BikeRack br = brSnapshot.getValue(BikeRack.class);
+                                mClusterManager.addItem(br);
+                            }
+                            mClusterManager.cluster();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+
+                    });
 
                     databaseCrime.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot crSnapshot : dataSnapshot.getChildren()) {
                                     CrimeData cr = crSnapshot.getValue(CrimeData.class);
-//                                mClusterManager.addItem(br);
                                    double lat = cr.getLatitude();
                                    double lng = cr.getLongitude();
                                    int count = cr.getCount();
-//                                   if (count > 10) {
-//                                       count = 10;
-//                                   }
                                    Log.d("count", ""+ count);
                                    LatLng loc = new LatLng(lat, lng);
                                    WeightedLatLng weighted = new WeightedLatLng(loc, count);
                                    heatlist.add(weighted);
 
-
-//                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
                             }
-                            addHeatMap();
                         }
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) { }
@@ -168,77 +200,8 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
                 pDialog.dismiss();
         }
     }
-    /**
-     * Async task class to get json by making HTTP call
-     */
-//    private class AddBikeRacks extends AsyncTask<Void, Void, Void> {
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            // Showing progress dialog
-//            pDialog = new ProgressDialog(BikeTheftMap.this);
-//            pDialog.setMessage("Please wait...");
-//            pDialog.setCancelable(false);
-//            pDialog.show();
-//
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... arg0) {
-//            final BitmapDescriptor icon = bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_marker);
-//
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//
-//                    databaseBikeracks.addValueEventListener(new ValueEventListener() {
-//                        @Override
-//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                            for (DataSnapshot brSnapshot : dataSnapshot.getChildren()) {
-//                                double lat = (double) brSnapshot.child("latitude").getValue();
-//                                double lng = (double) brSnapshot.child("longitude").getValue();
-//                                LatLng loc = new LatLng(lat, lng);
-//                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
-//                            }
-//                        }
-//                        @Override
-//                        public void onCancelled(@NonNull DatabaseError databaseError) { }
-//                    });
-//                }
-//            });
-//
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void result) {
-//            super.onPostExecute(result);
-//
-//            // Dismiss the progress dialog
-//            if (pDialog.isShowing())
-//                pDialog.dismiss();
-//        }
-//    }
 
     private void addHeatMap() {
-//        LatLng loc1 = new LatLng(49.282704, -123.123280);
-//        LatLng loc2 = new LatLng(49.283904, -123.121639);
-//        LatLng loc3 = new LatLng(49.282333, -123.122937);
-//        LatLng loc4 = new LatLng(49.283816, -123.124053);
-//        LatLng loc5 = new LatLng(49.285021, -123.126115);
-//
-//        WeightedLatLng weighted1 = new WeightedLatLng(loc1, 2);
-//        WeightedLatLng weighted2 = new WeightedLatLng(loc2, 4);
-//        WeightedLatLng weighted3 = new WeightedLatLng(loc3, 6);
-//        WeightedLatLng weighted4 = new WeightedLatLng(loc4, 8);
-//        WeightedLatLng weighted5 = new WeightedLatLng(loc5, 10);
-//        List<WeightedLatLng> list = new ArrayList<>();
-//        list.add(weighted1);
-//        list.add(weighted2);
-//        list.add(weighted3);
-//        list.add(weighted4);
-//        list.add(weighted5);
 
         // Create the gradient.
         int[] colors = {
