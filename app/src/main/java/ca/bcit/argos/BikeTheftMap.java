@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.bcit.argos.database.BikeRack;
+import ca.bcit.argos.database.CrimeData;
 
 public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback {
 
@@ -62,7 +63,9 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
     private ProgressDialog pDialog;
     private MarkerOptions options = new MarkerOptions();
     private ArrayList<BikeRack> brList = new ArrayList<>();
+    private List<WeightedLatLng> heatlist = new ArrayList<>();
     //DatabaseReference databaseBikeracks;
+    DatabaseReference databaseCrime;
 
 
     @Override
@@ -71,6 +74,7 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_bike_map);
 
         //databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
+        databaseCrime = FirebaseDatabase.getInstance().getReference("crime");
 
         getLocationPermission();
     }
@@ -90,14 +94,80 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         //new AddBikeRacks().execute();
+        new AddBikeCrime().execute();
 
         if(locationPermissionGranted) {
             getDeviceLocation();
             mMap.setMyLocationEnabled(true);
         }
-        addHeatMap();
+//        addHeatMap();
     }
 
+    /**
+     * Async task class to get json by making HTTP call
+     */
+    private class AddBikeCrime extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Showing progress dialog
+            pDialog = new ProgressDialog(BikeTheftMap.this);
+            pDialog.setMessage("Please wait...");
+            pDialog.setCancelable(false);
+            pDialog.show();
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+            final BitmapDescriptor icon = bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_marker);
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    databaseCrime.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot crSnapshot : dataSnapshot.getChildren()) {
+                                    CrimeData cr = crSnapshot.getValue(CrimeData.class);
+//                                mClusterManager.addItem(br);
+                                   double lat = cr.getLatitude();
+                                   double lng = cr.getLongitude();
+                                   int count = cr.getCount();
+//                                   if (count > 10) {
+//                                       count = 10;
+//                                   }
+                                   Log.d("count", ""+ count);
+                                   LatLng loc = new LatLng(lat, lng);
+                                   WeightedLatLng weighted = new WeightedLatLng(loc, count);
+                                   heatlist.add(weighted);
+
+
+//                                mMap.addMarker(new MarkerOptions().position(loc).icon(icon));
+                            }
+                            addHeatMap();
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) { }
+                    });
+
+                }
+            });
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            // Dismiss the progress dialog
+            if (pDialog.isShowing())
+                pDialog.dismiss();
+        }
+    }
     /**
      * Async task class to get json by making HTTP call
      */
@@ -152,43 +222,48 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
 //    }
 
     private void addHeatMap() {
-        LatLng loc1 = new LatLng(49.282704, -123.123280);
-        LatLng loc2 = new LatLng(49.283904, -123.121639);
-        LatLng loc3 = new LatLng(49.282333, -123.122937);
-        LatLng loc4 = new LatLng(49.283816, -123.124053);
-        LatLng loc5 = new LatLng(49.285021, -123.126115);
-
-        WeightedLatLng weighted1 = new WeightedLatLng(loc1, 2);
-        WeightedLatLng weighted2 = new WeightedLatLng(loc2, 4);
-        WeightedLatLng weighted3 = new WeightedLatLng(loc3, 6);
-        WeightedLatLng weighted4 = new WeightedLatLng(loc4, 8);
-        WeightedLatLng weighted5 = new WeightedLatLng(loc5, 10);
-        List<WeightedLatLng> list = new ArrayList<>();
-        list.add(weighted1);
-        list.add(weighted2);
-        list.add(weighted3);
-        list.add(weighted4);
-        list.add(weighted5);
+//        LatLng loc1 = new LatLng(49.282704, -123.123280);
+//        LatLng loc2 = new LatLng(49.283904, -123.121639);
+//        LatLng loc3 = new LatLng(49.282333, -123.122937);
+//        LatLng loc4 = new LatLng(49.283816, -123.124053);
+//        LatLng loc5 = new LatLng(49.285021, -123.126115);
+//
+//        WeightedLatLng weighted1 = new WeightedLatLng(loc1, 2);
+//        WeightedLatLng weighted2 = new WeightedLatLng(loc2, 4);
+//        WeightedLatLng weighted3 = new WeightedLatLng(loc3, 6);
+//        WeightedLatLng weighted4 = new WeightedLatLng(loc4, 8);
+//        WeightedLatLng weighted5 = new WeightedLatLng(loc5, 10);
+//        List<WeightedLatLng> list = new ArrayList<>();
+//        list.add(weighted1);
+//        list.add(weighted2);
+//        list.add(weighted3);
+//        list.add(weighted4);
+//        list.add(weighted5);
 
         // Create the gradient.
         int[] colors = {
-                Color.rgb(102, 225, 0),
-                Color.rgb(180, 225, 0),
-                Color.rgb(225, 221, 0),
-                Color.rgb(225, 146, 0),
-                Color.rgb(225, 45, 0),
-                Color.rgb(225, 0, 0)
+                Color.rgb(50, 78, 168),
+                Color.rgb(50, 168, 158),
+                Color.rgb(50, 168, 98),
+                Color.rgb(64, 168, 50),
+                Color.rgb(115, 168, 50),
+                Color.rgb(160, 168, 50),
+                Color.rgb(160, 141, 50),
+                Color.rgb(168, 113, 50),
+                Color.rgb(168, 86, 50),
+                Color.rgb(168, 50, 50),
+
 
         };
 
         float[] startPoints = {
-                0.1f, 0.2f, 0.3f, 0.4f, 0.6f, 1.0f
+                0.001f, 0.002f, 0.003f, 0.004f, 0.005f, 0.006f, 0.007f, 0.008f, 0.009f, 0.01f
         };
 
         Gradient gradient = new Gradient(colors, startPoints);
 
          mProvider = new HeatmapTileProvider.Builder()
-                .weightedData(list).radius(50).opacity(0.5).gradient(gradient)
+                .weightedData(heatlist).radius(50).gradient(gradient).opacity(0.5)
                 .build();
 
         mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
