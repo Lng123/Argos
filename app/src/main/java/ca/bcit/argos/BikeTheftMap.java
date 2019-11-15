@@ -174,7 +174,6 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
                                    double lat = cr.getLatitude();
                                    double lng = cr.getLongitude();
                                    int count = cr.getCount();
-                                   Log.d("count", ""+ count);
                                    LatLng loc = new LatLng(lat, lng);
                                    WeightedLatLng weighted = new WeightedLatLng(loc, count);
                                    heatlist.add(weighted);
