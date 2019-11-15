@@ -90,36 +90,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="#00FFFFFF"
-                    android:contentDescription="@string/btnHeatMap"
-                    android:layout_toStartOf="@id/btnBikeRacks"
-                    android:text="@string/btnBikeRacks"
-                    android:onClick="onBikeTheftMapClick"
+                    android:contentDescription="@string/btnMap"
+                    android:layout_toStartOf="@id/btnSettings"
+                    android:text="@string/btnMap"
+                    android:onClick="onMapClick"
                     app:srcCompat="@mipmap/ic_menu_map_foreground" />
 
                 <ImageButton
-                    android:id="@+id/btnBikeRacks"
+                    android:id="@+id/btnSettings"
                     style="@style/SquareButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="#00FFFFFF"
                     android:layout_centerHorizontal="true"
-                    android:contentDescription="@string/btnBikeRacks"
-                    android:text="@string/btnBikeRacks"
-                    android:onClick="onBikeRackMapClick"
-                    app:srcCompat="@mipmap/ic_menu_theftlog_foreground"
+                    android:contentDescription="@string/btnSettings"
+                    android:text="@string/btnSettings"
+                    android:onClick="onSettingsClick"
+                    app:srcCompat="@mipmap/ic_menu_settings_foreground"
                     />
-
-                <ImageButton
-                    android:id="@+id/btn"
-                    style="@style/SquareButton"
-                    android:layout_width="100dp"
-                    android:layout_toEndOf="@id/btnBikeRacks"
-                    android:layout_height="wrap_content"
-                    android:background="#00FFFFFF"
-                    android:contentDescription="@string/btnBikeRacks"
-                    android:text="@string/btnBikeRacks"
-                    android:onClick="toastAddress"
-                    app:srcCompat="@mipmap/ic_menu_settings_foreground" />
 
         </RelativeLayout>
 

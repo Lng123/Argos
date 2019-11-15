@@ -266,17 +266,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void toastAddress(View view) {
-        Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
-    }
-
-    public void showCoordinates(View view) {
-        getLastLocation();
-        String coord = mLastLocation.getLatitude() + ", " + mLastLocation.getLongitude();
-        Toast.makeText(this, coord, Toast.LENGTH_SHORT).show();
-    }
-
-
     private void showSnackbar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
         Snackbar.make(findViewById(android.R.id.content),
@@ -367,13 +356,13 @@ public class MainActivity extends AppCompatActivity {
         return sdf.format(d);
     }
 
-    public void onBikeRackMapClick(View v) {
-        Intent i = new Intent(this, BikeRackMap.class);
+    public void onMapClick(View v) {
+        Intent i = new Intent(this, BikeTheftMap.class);
         startActivity(i);
     }
 
-    public void onBikeTheftMapClick(View v) {
-        Intent i = new Intent(this, BikeTheftMap.class);
+    public void onSettingsClick(View view) {
+        Intent i = new Intent(this, AppSettings.class);
         startActivity(i);
     }
 
