@@ -10,4 +10,13 @@
     <string name="settings">Settings</string>
     <string name="show_theft">Show Theft</string>
     <string name="bgSpinnerLabel">Change Background:</string>
+    <string name="bgSave">Save</string>
+
+    <string-array name="backgrounds">
+        <item>Pink</item>
+        <item>Blue</item>
+        <item>Green</item>
+        <item>Purple</item>
+    </string-array>
+
 </resources>

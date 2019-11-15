@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:id="@+id/settings"
+    android:background="@drawable/bg_pink"
     tools:context=".AppSettings">
 
     <TextView
@@ -13,7 +14,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:textSize="20sp"
-        android:background="#E600000"
+        android:background="#20000000"
         android:text="@string/settings"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,17 +27,35 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
         android:textSize="15sp"
+        android:paddingBottom="5dp"
         android:text="@string/bgSpinnerLabel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/spinner"
+        android:id="@+id/bgSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="#40000000"
+        android:popupBackground="#90000000"
+        android:entries="@array/backgrounds"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bgSpinnerLabel" />
+
+    <Button
+        android:id="@+id/bgSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/bgSave"
+        android:background="#50000000"
+        android:onClick="onSaveBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bgSpinner" />
 
 </android.support.constraint.ConstraintLayout>

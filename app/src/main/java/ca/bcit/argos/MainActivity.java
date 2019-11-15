@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -22,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String API_KEY = BuildConfig.W_API_KEY;
     DatabaseReference databaseBikeracks;
     DatabaseReference databaseCrime;
+    SharedPreferences sp;
 
     private static String SERVICE_URL
             = "https://opendata.vancouver.ca/api/records/1.0/search/?dataset=bike-racks&rows=2000&facet=bia&facet=year_installed";
@@ -100,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
         tvFullDate.setText(getFullDate());
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
 
         brList = new ArrayList<BikeRack>();
         crimeList = new ArrayList<CrimeData>();
@@ -149,10 +151,33 @@ public class MainActivity extends AppCompatActivity {
         }));
     }
 
+    public void changeBackground(){
+        sp = getSharedPreferences("background", MODE_PRIVATE);
+        String bg = sp.getString("colour", "Pink");
+        LinearLayout main = findViewById(R.id.main);
+        switch (bg){
+            case "Pink":
+                main.setBackgroundResource(R.drawable.bg_pink);
+                break;
+            case "Blue":
+                main.setBackgroundResource(R.drawable.bg_blue);
+                break;
+            case "Green":
+                main.setBackgroundResource(R.drawable.bg_green);
+                break;
+            case "Purple":
+                main.setBackgroundResource(R.drawable.bg_purple);
+                break;
+        }
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString("colour", bg);
+        editor.apply();
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-
+        changeBackground();
         if (!checkPermissions()) {
             requestPermissions();
         } else {
