@@ -73,6 +73,7 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
     DatabaseReference databaseCrime;
     DatabaseReference databaseBikeracks;
     Switch theftsw;
+    private boolean switchchk;
 
 
     @Override
@@ -83,6 +84,9 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
 
         databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
         databaseCrime = FirebaseDatabase.getInstance().getReference("crime");
+        if (savedInstanceState != null) {
+            switchchk = savedInstanceState.getBoolean("checked");
+        }
 
         getLocationPermission();
     }
@@ -118,9 +122,10 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view) {
                 if(theftsw.isChecked()) {
                     addHeatMap();
-
+                    switchchk = true;
                 } else {
                     mOverlay.remove();
+                    switchchk =false;
                 }
             }
         });
@@ -178,6 +183,9 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
                                    WeightedLatLng weighted = new WeightedLatLng(loc, count);
                                    heatlist.add(weighted);
 
+                            }
+                            if (switchchk) {
+                                addHeatMap();
                             }
                         }
                         @Override
@@ -315,4 +323,12 @@ public class BikeTheftMap extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean("checked", switchchk);
+    }
+
 }
