@@ -14,7 +14,11 @@
         android:roundIcon="@mipmap/ic_app_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AppSettings"></activity>
+        <activity
+            android:name=".AppSettings"
+            android:configChanges="keyboardHidden|orientation|screenSize">
+
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -29,7 +33,9 @@
         <activity
             android:name=".BikeTheftMap"
             android:label="@string/title_activity_bike_map" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
