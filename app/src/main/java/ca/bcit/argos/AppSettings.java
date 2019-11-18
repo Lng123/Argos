@@ -6,11 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * This activity contains App Settings the user is allowed to change.
+ */
 public class AppSettings extends AppCompatActivity {
     Spinner spinner;
     SharedPreferences sp;
@@ -74,6 +76,11 @@ public class AppSettings extends AppCompatActivity {
         changeBackground();
     }
 
+    /**
+     * On save button click, the background is saved to SharedPreferences object.
+     *
+     * @param view.
+     */
     public void onSaveBackground(View view) {
         sp = getSharedPreferences("background", MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -82,6 +89,9 @@ public class AppSettings extends AppCompatActivity {
         Toast.makeText(this, "Background changed.", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Changes background according to saved value in SharedPreferences.
+     */
     public void changeBackground(){
         sp = getSharedPreferences("background", MODE_PRIVATE);
         String bg = sp.getString("colour", "Pink");
