@@ -78,9 +78,10 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference databaseCrime;
     SharedPreferences sp;
 
-    private static String SERVICE_URL
-            = "https://opendata.vancouver.ca/api/records/1.0/search/?dataset=bike-racks&rows=2000&facet=bia&facet=year_installed";
-    private static String GEOCODE_URL
+    static String SERVICE_URL
+            = "https://opendata.vancouver.ca/api/records/1.0/search/" +
+            "?dataset=bike-racks&rows=2000&facet=bia&facet=year_installed";
+    static String GEOCODE_URL
             = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     private ArrayList<BikeRack> brList;
     private ArrayList<CrimeData> crimeList;
@@ -93,9 +94,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Create references to database.
         databaseBikeracks = FirebaseDatabase.getInstance().getReference("bikeracks");
         databaseCrime = FirebaseDatabase.getInstance().getReference("crime");
 
+        //Updates view to show current date.
         TextView weekday = findViewById(R.id.tvWeekday);
         weekday.setText(getWeekday());
 
@@ -151,6 +154,9 @@ public class MainActivity extends AppCompatActivity {
         }));
     }
 
+    /**
+     * Changes background according to saved value in SharedPreferences.
+     */
     public void changeBackground(){
         sp = getSharedPreferences("background", MODE_PRIVATE);
         String bg = sp.getString("colour", "Pink");
@@ -186,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Asynchronous method for getting the book data from a JSON.
+     * Asynchronous method for getting the weather through a JSON call.
      */
     @SuppressLint("StaticFieldLeak")
     private class GetWeather extends AsyncTask<Void, Void, Void> {
@@ -232,6 +238,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Gets the last location and updates the city name in the view.
+     */
     private void getLastLocation() {
         mFusedLocationClient.getLastLocation()
                 .addOnCompleteListener(this, new OnCompleteListener<Location>() {
@@ -241,12 +250,14 @@ public class MainActivity extends AppCompatActivity {
                             mLastLocation = task.getResult();
 
                             TextView tvCity = findViewById(R.id.tvCity);
-                            tvCity.setText(getCityName(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+                            tvCity.setText(getCityName(mLastLocation.getLatitude(),
+                                    mLastLocation.getLongitude()));
                             new GetWeather().execute();
 
                         } else {
                             Log.w(TAG, "getLastLocation:exception", task.getException());
-                            Toast.makeText(MainActivity.this, "No location detected", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "No location detected",
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -261,6 +272,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Change weather icon based off value received.
+     *
+     * @param view: ImageView
+     * @param value: Weather icon
+     */
     private void changeWeatherIcon(final ImageView view, final String value){
         runOnUiThread(new Runnable() {
             @Override
@@ -291,6 +308,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Shows message given to the snackbar.
+     *
+     * @param mainTextStringId.
+     * @param actionStringId.
+     * @param listener.
+     */
     private void showSnackbar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
         Snackbar.make(findViewById(android.R.id.content),
@@ -299,19 +323,29 @@ public class MainActivity extends AppCompatActivity {
                 .setAction(getString(actionStringId), listener).show();
     }
 
+    /**
+     * Checks if the app has ACCESS_FINE_LOCATION permission.
+     *
+     * @return Boolean.
+     */
     private boolean checkPermissions() {
         int permissionState = ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Requests ACCESS_FINE_LOCATION permission from user.
+     *
+     */
     private void requestPermissions() {
         boolean shouldProvideRationale =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (shouldProvideRationale) {
-            showSnackbar(R.string.permission_rationale, android.R.string.ok, new View.OnClickListener() {
+            showSnackbar(R.string.permission_rationale,
+                    android.R.string.ok, new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             // Request permission
@@ -327,6 +361,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * If permission is given, sets the city name of view. Otherwise,
+     *  shows a snackbar alerting user that permission is needed.
+     *
+     * @param requestCode.
+     * @param permissions.
+     * @param grantResults.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -335,7 +377,8 @@ public class MainActivity extends AppCompatActivity {
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getLastLocation();
             } else {
-                showSnackbar(R.string.permission_denied_explanation, R.string.settings,
+                showSnackbar(R.string.permission_denied_explanation,
+                        R.string.settings,
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -354,6 +397,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * Gets the user's city name with use of geocoder.
+     *
+     * @param lat: Phone's latitude
+     * @param lng: Phone's longitude
+     * @return CityName
+     */
     public String getCityName(double lat, double lng) {
         geoPoint = new Geocoder(this, Locale.getDefault());
         List<Address> addresses;
@@ -369,23 +420,38 @@ public class MainActivity extends AppCompatActivity {
         return cityName;
     }
 
+    /**
+     * Gets the day off the week based off Date.
+     * @return Weekday
+     */
     private String getWeekday() {
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.US);
         Date d = new Date();
         return sdf.format(d);
     }
 
+
+    /**
+     * Gets the full date off the week based off Date.
+     * @return full date.
+     */
     private String getFullDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy", Locale.US);
         Date d = new Date();
         return sdf.format(d);
     }
 
+    /**
+     * Sends app to BikeTheftMap Activity.
+     */
     public void onMapClick(View v) {
         Intent i = new Intent(this, BikeTheftMap.class);
         startActivity(i);
     }
 
+    /**
+     * Sends app to AppSettings Activity.
+     */
     public void onSettingsClick(View view) {
         Intent i = new Intent(this, AppSettings.class);
         startActivity(i);
