@@ -28,9 +28,6 @@
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <activity
-            android:name=".BikeRackMap"
-            android:label="@string/title_activity_bike_map" />
-        <activity
             android:name=".BikeTheftMap"
             android:label="@string/title_activity_bike_map" />
         <activity
