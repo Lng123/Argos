@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
             String WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat="
                                  + mLastLocation.getLatitude() + "&lon="
                                  + mLastLocation.getLongitude() + "&units=metric"
-                                 + "&APPID=" + API_KEY;
+                                 + "&APPID=7faefc359e5dfd50ce94fcd1d65ac923";
             jsonStr = sh.makeServiceCall(WEATHER_URL);
 
             try {
@@ -311,9 +311,9 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Shows message given to the snackbar.
      *
-     * @param mainTextStringId.
-     * @param actionStringId.
-     * @param listener.
+     * @param mainTextStringId
+     * @param actionStringId
+     * @param listener
      */
     private void showSnackbar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
@@ -365,9 +365,9 @@ public class MainActivity extends AppCompatActivity {
      * If permission is given, sets the city name of view. Otherwise,
      *  shows a snackbar alerting user that permission is needed.
      *
-     * @param requestCode.
-     * @param permissions.
-     * @param grantResults.
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
